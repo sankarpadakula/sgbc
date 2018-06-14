@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="utf-8" />
+<link th:href="@{css/bootstrap.min.css}" rel="stylesheet" />
+<link th:href="@{css/style.css}" rel="stylesheet" />
+
+<title>SignUp Page</title>
+</head>
+
+<body class="gray-bg">
+
+  <div class="middle-box text-center loginscreen animated fadeInDown">
+  <div class="form-group row">
+      <h2><a class="col-md-1" th:href="@{/}"><span class="glyphicon glyphicon-home"></span></a></h2>
+      <h2 class="col-md-3" style="padding-right:2px;margin-top: 2px;"><strong th:utext="#{signup.title}"></strong></h2>
+      <div class="col-md-7" style="text-align: right;padding:0px;margin:2px 0px;">
+        <a th:href="@{/signup?lang=en}"><span th:text="#{label.english}"></span></a>&nbsp;|&nbsp;
+        <a th:href="@{/signup?lang=nl}"><span th:text="#{label.dutch}"></span></a>&nbsp;|&nbsp;
+        <a th:href="@{/signup?lang=ur}"><span th:text="#{label.urdu}"></span></a>
+      </div>
+  </div>
+      <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text=${successMessage}></div>
+      <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text=${errorMessage}></div>
+
+      <form autocomplete="off" action="#" th:action="@{/signup}" th:object="${user}" method="post" role="form">
+
+        <div class="form-group input-group">
+          <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
+          <input name="user" type="text" id="user" th:field="*{name}" th:placeholder="#{signup.label.userName}" class="form-control" required />
+          <span class="glyphicon" aria-hidden="true"></span>
+        </div>
+        <div class="form-group input-group">
+          <span class="input-group-addon"><span class="glyphicon glyphicon-envelope"></span></span>
+          <input type="text" th:field="*{email}" th:placeholder="#{signup.label.email}" class="form-control" /> <label
+                th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="validation-message"></label>
+        </div>
+        <div class="form-group input-group">
+          <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
+          <input name="password" type="password" id="password" th:field="*{password}" th:placeholder="#{signup.label.password}" class="form-control" required />
+          <span class="glyphicon" aria-hidden="true"></span>
+        </div>
+        
+        <div class="form-group row">
+        <div class="col-md-8">
+          <button type="submit" class="btn btn-primary block full-width m-b"><strong th:utext="#{signup.button.submit}" ></strong></button>
+        </div>
+        <div class="col-md-4">
+          <h4 class="text-center"><a th:href="@{/login}"><span th:text="#{label.login}"></span></a></h4>
+        </div>
+        </div>
+      </form>
+  </div>
+
+  <!-- jQuery-->
+  <script src="js/jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+!doctype html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Cell Editing in DataGrid - jQuery EasyUI Demo</title>
+    <link rel="stylesheet" type="text/css" href="https://www.jeasyui.com/easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="https://www.jeasyui.com/easyui/themes/icon.css">
+    <script type="text/javascript" src="https://www.jeasyui.com/easyui/jquery.min.js"></script>
+    <script type="text/javascript" src="https://www.jeasyui.com/easyui/jquery.easyui.min.js"></script>
+</head>
+<body>
+    <h2>Cell Editing in DataGrid</h2>
+    <p>Click a cell to start editing.</p>
+    
+    <table id="dg" title="Cell Editing in DataGrid" style="width:700px;height:250px">
+        <thead>
+            <tr>
+                <th data-options="field:'id',width:100">Item ID</th>
+                <th data-options="field:'name',width:100,editor:'text'">Product</th>
+                <th data-options="field:'email',width:80,align:'right'">List Price</th>
+                <th data-options="field:'phone',width:80,align:'right',editor:'numberbox'">Unit Cost</th>
+                <th data-options="field:'martial',width:250,editor:'text'">Attribute</th>
+                <th data-options="field:'enable',width:60,align:'center',editor:{type:'checkbox',options:{on:'P',off:''}}">Status</th>
+            </tr>
+            </tr>
+        </thead>
+    </table>
+    <script type="text/javascript">
+        $(function(){
+            var dg = $('#dg').datagrid({
+                url: "../rest/applicants"
+            });
+            dg.datagrid('enableCellEditing').datagrid('gotoCell', {
+                index: 0,
+                field: 'enable'
+            });
+        });
+    </script>
+</body>
+</html>

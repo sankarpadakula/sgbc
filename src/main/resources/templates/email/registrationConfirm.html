@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.thymeleaf.org">
+<head></head>
+<body>
+	<p>Dear <span th:text="${applicant.name}"></span>, <br />
+	   Your registration is approved. Find the details below<br />
+	</p>
+	<table>
+		<tr><td>Registration Number</td><td>Name</td></tr>
+		<tr><td th:text="${applicant.id}"></td><td th:text="${applicant.name}"></td></tr>
+		<tr th:each="partner : ${applicant.partner}"><td /><td th:text="${partner.name}"></td></tr>
+		<tr th:each="kid : ${applicant.childrens}"><td /><td th:text="${kid.name}"></td></tr>
+	</table>
+	<br />
+	<p>
+		Please pay every month <span th:text="${pay}"></span><br />
+		Thank you 
+	</p>
+</body>
+</html>

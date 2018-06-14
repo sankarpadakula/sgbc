@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="utf-8" />
+<title>User Login</title>
+<link th:href="@{css/bootstrap.min.css}" rel="stylesheet" />
+<link th:href="@{css/style.css}" rel="stylesheet" />
+</head>
+
+<body class="gray-bg">
+
+  <div class="middle-box text-center loginscreen animated fadeInDown">
+  <div class="form-group row">
+      <h2><a class="col-md-1" th:href="@{/}"><span class="glyphicon glyphicon-home"></span></a></h2>
+      <h2 class="col-md-4" style="margin-top: 2px;"><strong th:utext="#{login.title}"></strong></h2>
+      <div class="col-md-6" style="text-align: right;padding:0px;margin:0px;">
+        <a th:href="@{/login?lang=en}"><span th:text="#{label.english}"></span></a>&nbsp;|&nbsp;
+        <a th:href="@{/login?lang=nl}"><span th:text="#{label.dutch}"></span></a>&nbsp;|&nbsp;
+        <a th:href="@{/login?lang=ur}"><span th:text="#{label.urdu}"></span></a>
+      </div>
+  </div>
+      <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text=${successMessage}></div>
+      <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text=${errorMessage}></div>
+
+      <form class="m-t" id="passwordForm" role="form" action="#" th:object="${user}" th:action="@{/login}" method="post">
+
+        <div class="form-group input-group">
+          <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
+          <input name="user" type="text" id="user" th:placeholder="#{login.label.userName}" class="form-control" required />
+          <span class="glyphicon" aria-hidden="true"></span>
+        </div>
+        <div class="form-group input-group">
+          <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
+          <input name="password" type="password" id="password" th:placeholder="#{login.label.password}" class="form-control" required />
+          <span class="glyphicon" aria-hidden="true"></span>
+        </div>
+        <div class="form-group remember-me">
+          <label class="checkbox-inline" for="remember-me-0">
+            <input type="checkbox" name="remember-me" id="remember-me-0" value="true" /><span th:text="#{login.label.rememberMe}"></span>
+          </label>
+        </div>
+        <div class="form-group row">
+        <div class="col-md-8">
+          <button type="submit" class="btn btn-primary block full-width m-b"><strong th:utext="#{label.login}" ></strong></button>
+        </div>
+        <div class="col-md-4">
+          <h4 class="text-center"><a th:href="@{/signup}"><span th:text="#{signup.button.submit}"></span></a></h4>
+        </div>
+        </div>
+      </form>
+  </div>
+
+  <!-- jQuery-->
+  <script src="js/jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+</body>
+</html>
