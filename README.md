@@ -4,6 +4,6 @@
 3. Go to the target folder
 4. java -jar sgc-1.0.jar
 
-- http://localhost:8080/registration
+- http://localhost:8080/
 - http://localhost:8080/login
 # sgbc

@@ -1,6 +1,5 @@
 package com.sp.sgbc.model;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -11,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -19,6 +19,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
 
 @Entity
 @Table(name = "applicant")
@@ -48,7 +49,7 @@ public class Applicant {
   @Temporal(TemporalType.DATE)
   private Date dateOfBirth;
 
-  private String martialStatus;
+  private String maritalStatus;
 
   private String bsnNum;
 
@@ -57,14 +58,11 @@ public class Applicant {
   @OneToOne(cascade = CascadeType.ALL)
   private Dependent partner;
 
-  private String otherContactUserName;
+  @OneToOne(cascade = CascadeType.ALL)
+  private Dependent otherContact;
 
   @ManyToOne(cascade = CascadeType.ALL)
   private Address otherContactAddress;
-
-  private String otherContactGender;
-
-  private String otherContactPhone;
 
   @OneToMany(cascade = CascadeType.ALL, mappedBy = "applicant")
   private List<Dependent> childrens = new ArrayList<Dependent>();
@@ -74,10 +72,20 @@ public class Applicant {
   private String wishes;
 
   private boolean active;
-  
-  private File docs;
+
+  private transient MultipartFile docs;
+
+  private String fileName;
+
+  @Lob
+  private byte[] fileData;
 
   private String confirmationToken;
+
+  @DateTimeFormat(pattern = "dd/MM/yyyy")
+  private Date startDate;
+
+  private String createdBy;
 
   @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
   @Temporal(TemporalType.DATE)
@@ -88,6 +96,9 @@ public class Applicant {
   @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
   @Temporal(TemporalType.DATE)
   private Date modifiedDate;
+
+  private transient double initBalance;
+  private transient double closeBalance;
 
   public Address getAddress() {
     return address;
@@ -137,11 +148,11 @@ public class Applicant {
     this.active = active;
   }
 
-  public File getDocs() {
+  public MultipartFile getDocs() {
     return docs;
   }
 
-  public void setDocs(File docs) {
+  public void setDocs(MultipartFile docs) {
     this.docs = docs;
   }
 
@@ -185,12 +196,12 @@ public class Applicant {
     this.dateOfBirth = dateOfBirth;
   }
 
-  public String getMartialStatus() {
-    return martialStatus;
+  public String getMaritalStatus() {
+    return maritalStatus;
   }
 
-  public void setMartialStatus(String martialStatus) {
-    this.martialStatus = martialStatus;
+  public void setMaritalStatus(String maritalStatus) {
+    this.maritalStatus = maritalStatus;
   }
 
   public String getBsnNum() {
@@ -228,14 +239,6 @@ public class Applicant {
     this.childrens = childrens;
   }
 
-  public String getOtherContactUserName() {
-    return otherContactUserName;
-  }
-
-  public void setOtherContactUserName(String otherContactUserName) {
-    this.otherContactUserName = otherContactUserName;
-  }
-
   public Address getOtherContactAddress() {
     return otherContactAddress;
   }
@@ -244,20 +247,12 @@ public class Applicant {
     this.otherContactAddress = otherContactAddress;
   }
 
-  public String getOtherContactPhone() {
-    return otherContactPhone;
+  public Dependent getOtherContact() {
+    return otherContact;
   }
 
-  public void setOtherContactPhone(String otherContactPhone) {
-    this.otherContactPhone = otherContactPhone;
-  }
-
-  public String getOtherContactGender() {
-    return otherContactGender;
-  }
-
-  public void setOtherContactGender(String otherContactGender) {
-    this.otherContactGender = otherContactGender;
+  public void setOtherContact(Dependent otherContact) {
+    this.otherContact = otherContact;
   }
 
   public String getModifiedBy() {
@@ -290,6 +285,54 @@ public class Applicant {
 
   public void setWishes(String wishes) {
     this.wishes = wishes;
+  }
+
+  public Date getStartDate() {
+    return startDate;
+  }
+
+  public void setStartDate(Date startDate) {
+    this.startDate = startDate;
+  }
+
+  public String getFileName() {
+    return fileName;
+  }
+
+  public void setFileName(String fileName) {
+    this.fileName = fileName;
+  }
+
+  public byte[] getFileData() {
+    return fileData;
+  }
+
+  public void setFileData(byte[] fileData) {
+    this.fileData = fileData;
+  }
+
+  public double getInitBalance() {
+    return initBalance;
+  }
+
+  public void setInitBalance(double initBalance) {
+    this.initBalance = initBalance;
+  }
+
+  public double getCloseBalance() {
+    return closeBalance;
+  }
+
+  public void setCloseBalance(double closeBalance) {
+    this.closeBalance = closeBalance;
+  }
+
+  public String getCreatedBy() {
+    return createdBy;
+  }
+
+  public void setCreatedBy(String createdBy) {
+    this.createdBy = createdBy;
   }
 
 }

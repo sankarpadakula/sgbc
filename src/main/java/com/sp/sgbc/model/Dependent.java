@@ -14,6 +14,8 @@ import javax.persistence.TemporalType;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.sp.sgbc.util.DependentType;
+
 @Entity
 @Table(name = "dependent")
 public class Dependent {
@@ -34,9 +36,27 @@ public class Dependent {
 
   private String bsnNum;
 
+  private DependentType type;
+
   private String gender;
+  
+  private String phone;
 
   private Boolean active;
+
+  private boolean remainder;
+
+  private String createdBy;
+
+  @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
+  @Temporal(TemporalType.DATE)
+  private Date createdDate;
+
+  private String modifiedBy;
+
+  @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
+  @Temporal(TemporalType.DATE)
+  private Date modifiedDate;
 
   public Long getId() {
     return id;
@@ -100,6 +120,62 @@ public class Dependent {
 
   public void setBsnNum(String bsnNum) {
     this.bsnNum = bsnNum;
+  }
+
+  public boolean isRemainder() {
+    return remainder;
+  }
+
+  public void setRemainder(boolean remainder) {
+    this.remainder = remainder;
+  }
+
+  public String getCreatedBy() {
+    return createdBy;
+  }
+
+  public void setCreatedBy(String createdBy) {
+    this.createdBy = createdBy;
+  }
+
+  public Date getCreatedDate() {
+    return createdDate;
+  }
+
+  public void setCreatedDate(Date createdDate) {
+    this.createdDate = createdDate;
+  }
+
+  public String getModifiedBy() {
+    return modifiedBy;
+  }
+
+  public void setModifiedBy(String modifiedBy) {
+    this.modifiedBy = modifiedBy;
+  }
+
+  public Date getModifiedDate() {
+    return modifiedDate;
+  }
+
+  public void setModifiedDate(Date modifiedDate) {
+    this.modifiedDate = modifiedDate;
+  }
+
+  public DependentType getType() {
+    return type;
+  }
+
+  public void setType(DependentType type) {
+    this.type = type;
+  }
+
+  public String getPhone() {
+    return phone;
+  }
+
+  public void setPhone(String phone) {
+    this.phone = phone;
   }
 
 }

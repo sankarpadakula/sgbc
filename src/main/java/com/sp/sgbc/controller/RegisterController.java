@@ -1,9 +1,9 @@
 package com.sp.sgbc.controller;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -18,11 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -32,6 +31,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.sp.sgbc.model.Applicant;
@@ -39,6 +39,8 @@ import com.sp.sgbc.model.Dependent;
 import com.sp.sgbc.service.ApplicantService;
 import com.sp.sgbc.service.EmailService;
 import com.sp.sgbc.service.MailContentBuilder;
+import com.sp.sgbc.util.DependentType;
+import com.sp.sgbc.util.Helper;
 import com.sp.sgbc.validator.ApplicantValidator;
 
 @Controller
@@ -61,16 +63,13 @@ public class RegisterController {
   @Autowired
   ApplicantValidator applicantValidator;
 
-  @Value("${mail.from}")
-  private String fromEmail;
-
-  @Value("${mail.admin.approve}")
-  private String adminEmails;
-
   @Value("${registration.pay.person}")
   private Integer payPerPerson;
 
   private final String REGISTRATION_PAGE = "registration";
+  private final String TERMS_PAGE = "terms-and-conditions";
+  private final String ADMIN_PAGE = "admin/home";
+
   private final String VALIDATION_ERROR = "validationMessage";
   private final String INFORMATION_MESSAGE = "confirmationMessage";
   static final String DEFAULT_DUPLICATE_USER = "Oops!  There is already a user registered with the email provided.";
@@ -90,25 +89,24 @@ public class RegisterController {
   // Process form input data
   @RequestMapping(value = "/", method = RequestMethod.POST)
   public ModelAndView processRegistrationForm(ModelAndView modelAndView, @Valid Applicant user,
-      BindingResult bindingResult, HttpServletRequest request) {
+      @RequestParam("docs") MultipartFile file, BindingResult bindingResult, HttpServletRequest request) {
     applicantValidator.validate(user, bindingResult);
     Locale locale = LocaleContextHolder.getLocale();
     if (bindingResult.hasErrors()) {
-      String error = bindingResult.getAllErrors().stream().map(v -> v.toString().split(";")[0])
-          .collect(Collectors.joining(","));
+      //String error = bindingResult.getAllErrors().stream().map(v -> v.toString().split(";")[0]).collect(Collectors.joining(","));
+      String error = getError(bindingResult);
       LOGGER.warn("Validation failed " + error);
-      String message = messageSource.getMessage("registration.user.exist", null, DEFAULT_DUPLICATE_USER, locale);
-      modelAndView.addObject(VALIDATION_ERROR, message);
+      modelAndView.addObject(VALIDATION_ERROR, error);
     } else {
       buildNewApplicantDefaults(user);
-      applicantService.saveApplicant(user);
+      applicantService.save(user);
       String appUrl = request.getRequestURL().toString();
       // appUrl = request.getScheme() + "://" + request.getServerName() + request.getServerPort() +
       // request.getContextPath();
       LOGGER.info("To Activate " + appUrl + "confirm?token=" + user.getConfirmationToken());
       String subject = messageSource.getMessage("registration.request.subject", null, DEFAULT_EMAIL_APP_REQ, locale);
       String body = buildApprovalRequestMessage(appUrl, user);
-      sendHtmlEmail(subject, body, adminEmails.split("[\\s,;]+"));
+      emailService.sendHtmlEmail(subject, body);
 
       user = new Applicant();
       String message = messageSource.getMessage("registration.submission.confirmation", null,
@@ -120,13 +118,24 @@ public class RegisterController {
     return modelAndView;
   }
 
+  private String getError(BindingResult bindingResult) {
+    StringBuilder b = new StringBuilder();
+    b.append(bindingResult.getGlobalErrors().stream().map(v -> v.getCode()).collect(Collectors.joining("; \n")));
+    if (b.length() > 0)
+      b.append("; \n");
+    b.append(bindingResult.getFieldErrors().stream().map(v -> v.getField()+":"+v.getCode()).distinct().collect(Collectors.joining("; \n")));
+    return b.toString().replaceAll("\\.", "'s ").replaceAll("\\[0\\]", "");
+  }
+
   @RequestMapping(value = "/confirm", method = RequestMethod.GET)
-  public ModelAndView confirmRegistrationRequest(ModelAndView modelAndView, @RequestParam(name="token", required=false) String token, @RequestParam(name="id", required=false) Long regid) {
+  public ModelAndView confirmRegistrationRequest(ModelAndView modelAndView,
+      @RequestParam(name = "token", required = false) String token,
+      @RequestParam(name = "id", required = false) Long regid) {
     Applicant user = null;
-   if (regid == null)
+    if (regid == null)
       user = applicantService.findApplicantByConfirmationToken(token);
-    else 
-      user = applicantService.getApplicantById(regid);
+    else
+      user = applicantService.findOne(regid);
 
     if (user == null) { // No token found in DB
       user = new Applicant();
@@ -142,26 +151,43 @@ public class RegisterController {
   }
 
   @GetMapping("/files/{id}")
-  public ResponseEntity<File> downloadFile(@PathVariable Long id, @RequestParam(name="file", required=false) String filename) {
-      File file = applicantService.getApplicantById(id).getDocs();
-      return ResponseEntity.ok()
-                  .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
-                  .body(file);    
+  public ResponseEntity<Resource> downloadFile(@PathVariable Long id,
+      @RequestParam(name = "file", required = false) String filename) {
+    Applicant applicant = applicantService.findOne(id);
+    InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(applicant.getFileData()));
+    return ResponseEntity.ok()
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + applicant.getFileName() + "\"")
+        .body(resource);
   }
-  
-  @RequestMapping(value = "/admin/home", method = {RequestMethod.POST,RequestMethod.GET})
+
+  @RequestMapping(value = "/admin/home", method = { RequestMethod.POST, RequestMethod.GET })
   public ModelAndView confirmRegistration(ModelAndView modelAndView, Applicant user) {
 
     if (user.getConfirmationToken() != null) {
-    Applicant applicant = applicantService.findApplicantByConfirmationToken(user.getConfirmationToken());
+      Applicant applicant = applicantService.findApplicantByConfirmationToken(user.getConfirmationToken());
       if (applicant != null) {
         applicant.setActive(user.isActive());
         applicant.setNotes(user.getNotes());
         applicant.setModifiedDate(new Date());
+        applicant.setStartDate(Helper.getNextMonthStartDate());
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null)
           applicant.setModifiedBy(auth.getName());
-        applicantService.saveApplicant(applicant);
+        if (user.isActive()) {
+          if (applicant.getPartner() != null) {
+            applicant.getPartner().setActive(true);
+          }
+          if (applicant.getOtherContact() != null) {
+            applicant.getOtherContact().setActive(true);
+          }
+          if (applicant.getChildrens() != null) {
+            for (Dependent dependent : applicant.getChildrens()) {
+              dependent.setActive(true);
+              dependent.setRemainder(false);
+            }
+          }
+        }
+        applicantService.save(applicant);
       }
       if (applicant.isActive()) {
         String subject = messageSource.getMessage("registration.confirmation.subject", null, DEFAULT_EMAIL_APP_RES,
@@ -171,36 +197,51 @@ public class RegisterController {
           noOfPersons = noOfPersons + 1;
         }
         String body = buildApprovalConfirmationMessage(payPerPerson * noOfPersons, applicant);
-        sendHtmlEmail(subject, body, new String[] { applicant.getEmail() });
+        emailService.sendHtmlEmail(subject, body, true, new String[] { applicant.getEmail() });
       }
     }
     modelAndView = new ModelAndView();
-    modelAndView.addObject("Results", applicantService.getAllApplicants());
-    modelAndView.addObject("adminMessage", "Content Available Only for Users with Admin Role");
-    modelAndView.setViewName("admin/easyui");
+    // modelAndView.addObject("Results", applicantService.findAll());
+    // modelAndView.addObject("adminMessage", "Content Available Only for Users with Admin Role");
+    modelAndView.setViewName(ADMIN_PAGE);
     return modelAndView;
   }
 
   @RequestMapping(value = "/terms-and-conditions", method = RequestMethod.GET)
   public ModelAndView termsandConditions(ModelAndView modelAndView) {
-    modelAndView.setViewName("terms-and-conditions");
+    modelAndView.setViewName(TERMS_PAGE);
     return modelAndView;
   }
-  
+
   private void buildNewApplicantDefaults(Applicant user) {
     if (user.getPartner() != null && (user.getPartner().getName() == null || user.getPartner().getName().isEmpty())) {
       user.setPartner(null);
+    } else {
+      user.getPartner().setType(DependentType.Spouse);
+    }
+    Dependent contact = user.getOtherContact();
+    if (contact != null) {
+      contact.setType(DependentType.OtherContact);
     }
     if (user.getChildrens() != null) {
       for (Dependent kid : user.getChildrens()) {
+        kid.setType(DependentType.Child);
         kid.setApplicant(user);
       }
+    }
+    
+    MultipartFile file = user.getDocs();
+    user.setFileName(file.getOriginalFilename());
+    try {
+      user.setFileData(file.getBytes());
+    } catch (IOException e) {
+
     }
     user.setActive(false);
     user.setCreatedDate(new Date());
     user.setConfirmationToken(UUID.randomUUID().toString());
   }
-  
+
   private String buildApprovalRequestMessage(String baseurl, Applicant user) {
     int dependents = user.getPartner() != null ? 1 : 0;
     if (user.getChildrens() != null && !user.getChildrens().isEmpty()) {
@@ -223,15 +264,4 @@ public class RegisterController {
     return mailContent.build("registrationConfirm", map);
   }
 
-  private void sendHtmlEmail(String subject, String body, String[] to) {
-    MimeMessagePreparator registrationEmail = mimeMessage -> {
-      MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
-      helper.setTo(to);
-      helper.setSubject(subject);
-      helper.setText(body, true);
-      helper.setFrom(fromEmail);
-    };
-    //emailService.sendEmail(registrationEmail);
-    LOGGER.info(subject + " information sent to " + to);
-  }
 }

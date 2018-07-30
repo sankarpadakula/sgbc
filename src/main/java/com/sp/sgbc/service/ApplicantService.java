@@ -1,7 +1,9 @@
 package com.sp.sgbc.service;
 
 import java.util.List;
-import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.sp.sgbc.model.Applicant;
 
@@ -10,12 +12,20 @@ public interface ApplicantService {
   public Applicant findApplicantByEmail(String email);
   
   public Applicant findApplicantByConfirmationToken(String token);
-  
-  public Applicant saveApplicant(Applicant applicant);
-  
+
   public Applicant getApplicantByName(String name);
   
-  public Applicant getApplicantById(Long id);
+  public Applicant save(Applicant applicant);
+  
+  public Applicant findOne(Long id);
 
-  public List<Applicant> getAllApplicants();
+  public List<Applicant> findAll();
+
+  public Page<Applicant> findAll(Pageable pageable);
+  
+  public boolean exists(Long id);
+  
+  public List<Applicant> getUnpaidApplicants(int months);
+
+  public void save(List<Applicant> applicants);
 }

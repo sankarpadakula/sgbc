@@ -1,0 +1,25 @@
+# Created on 2018-07-24T12:01:28.876
+java.io.IOException: Cannot run program "CMD": CreateProcess error=5, Access is denied
+	at java.lang.ProcessBuilder.start(ProcessBuilder.java:1048)
+	at org.apache.maven.surefire.booter.PpidChecker$ProcessInfoConsumer.execute(PpidChecker.java:269)
+	at org.apache.maven.surefire.booter.PpidChecker.windows(PpidChecker.java:185)
+	at org.apache.maven.surefire.booter.PpidChecker.isProcessAlive(PpidChecker.java:95)
+	at org.apache.maven.surefire.booter.ForkedBooter$2.run(ForkedBooter.java:207)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.runAndReset(FutureTask.java:308)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$301(ScheduledThreadPoolExecutor.java:180)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:294)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:748)
+Caused by: java.io.IOException: CreateProcess error=5, Access is denied
+	at java.lang.ProcessImpl.create(Native Method)
+	at java.lang.ProcessImpl.<init>(ProcessImpl.java:386)
+	at java.lang.ProcessImpl.start(ProcessImpl.java:137)
+	at java.lang.ProcessBuilder.start(ProcessBuilder.java:1029)
+	... 11 more
+
+
+# Created on 2018-07-24T12:01:28.892
+System.exit() or native command error interrupted process checker.
+

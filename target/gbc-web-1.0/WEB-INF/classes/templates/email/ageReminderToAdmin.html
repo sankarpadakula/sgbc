@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.thymeleaf.org">
+<head></head>
+<body>
+  <p>
+    Dear Admin, <br /> Below list of peoples are going to complete 18 years<br />
+  <p>List Prepared date is <span th:text="${date}"></span></p>
+  list
+  <div th:if="${not #lists.isEmpty(dependents)}">
+    <table border="1" class="table table-striped">
+      <tr>
+        <th>Name</th>
+        <th>Date Of Birth</th>
+        <th>Main Applicant</th>
+        <th>Email</th>
+      </tr>
+      <tr th:each="dependent : ${dependents}">
+        <td th:text="${dependent.name}"></td>
+        <td th:text="${dependent.dateOfBirth}"></td>
+        <td th:text="${dependent.applicant.name}"></td>
+        <td th:text="${dependent.applicant.email}"></td>
+      </tr>
+    </table>
+  </div>
+  <br />
+  <p>Thank you</p>
+</body>
+</html>

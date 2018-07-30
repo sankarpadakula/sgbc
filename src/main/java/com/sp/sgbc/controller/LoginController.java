@@ -63,14 +63,14 @@ public class LoginController {
 		return modelAndView;
 	}
 	
-	@RequestMapping(value="/admin/applicants", method = RequestMethod.GET)
+	@RequestMapping(value="/login", method = RequestMethod.POST)
 	public ModelAndView home(){
 		ModelAndView modelAndView = new ModelAndView();
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		User user = userService.findUserByEmail(auth.getName());
-		modelAndView.addObject("Results",applicantService.getAllApplicants());
+		//modelAndView.addObject("Results",applicantService.findAll());
 		modelAndView.addObject("adminMessage","Content Available Only for Users with Admin Role");
-		modelAndView.setViewName("admin/datagrid");
+		modelAndView.setViewName("admin/home");
 		return modelAndView;
 	}
 	
