@@ -11,6 +11,8 @@ public interface ApplicantService {
 
   public Applicant findApplicantByEmail(String email);
   
+  public Applicant findApplicantByBsnNum(String bsnNum);
+  
   public Applicant findApplicantByConfirmationToken(String token);
 
   public Applicant getApplicantByName(String name);

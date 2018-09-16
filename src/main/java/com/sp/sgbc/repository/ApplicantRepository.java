@@ -10,6 +10,7 @@ import com.sp.sgbc.model.Applicant;
 @Repository("applicantRepository")
 public interface ApplicantRepository extends JpaRepository<Applicant, Long> {
   Applicant findByEmail(String email);
+  Applicant findByBsnNum(String bsnNum);
   Applicant findByName(String name);
   Applicant findByConfirmationToken(String token);
   List<Applicant> findByActive(boolean active);

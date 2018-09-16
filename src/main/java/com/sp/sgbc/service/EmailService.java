@@ -43,7 +43,7 @@ public class EmailService {
 
   @Async
   public void sendEmail(MimeMessagePreparator email) {
-    // mailSender.send(email);
+     //mailSender.send(email);
   }
 
   public void sendHtmlEmail(final String subject, final String body) {
@@ -86,7 +86,7 @@ public class EmailService {
       helper.setSubject(subject);
       helper.setText(body, true);
       if (attachRequired) {
-        String attach = mailContent.buildPDF(body);
+        String attach = mailContent.includeTemplate(body);
         helper.addAttachment(subject + ".pdf", new ByteArrayResource(Helper.createPdf(attach)));
       }
       helper.setFrom(fromEmail);

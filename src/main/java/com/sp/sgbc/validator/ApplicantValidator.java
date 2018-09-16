@@ -37,12 +37,12 @@ public class ApplicantValidator implements Validator {
 
     ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "NotEmpty");
     Locale locale = LocaleContextHolder.getLocale();
-    if (applicantService.findApplicantByEmail(app.getEmail()) != null) {
+    if (applicantService.findApplicantByBsnNum(app.getBsnNum()) != null) {
       String message = messageSource.getMessage("registration.user.exist", null, "Duplicate user/email", locale);
       errors.rejectValue("name", message);
       return;
     }
-    if (app.getPartner() != null) {
+    if (app.getPartner() != null && "Married".equals(app.getMaritalStatus())) {
       try {
         app.getPartner().setType(DependentType.Spouse);
         errors.pushNestedPath("partner");
@@ -64,7 +64,7 @@ public class ApplicantValidator implements Validator {
       }
     }
 
-    if (app.getOtherContact() != null) {
+ /*   if (app.getOtherContact() != null) {
       try {
         app.getOtherContact().setType(DependentType.OtherContact);
         errors.pushNestedPath("otherContact");
@@ -72,6 +72,6 @@ public class ApplicantValidator implements Validator {
       } finally {
         errors.popNestedPath();
       }
-    }
+    }*/
   }
 }

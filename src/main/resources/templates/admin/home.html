@@ -38,6 +38,7 @@
             <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span th:text="${currentUser}"></span></a>
             <div class="dropdown-menu">
               <a class="dropdown-item" th:href="@{/}"><span th:text="#{label.home}"></span></a>
+              <a class="dropdown-item" th:href="@{/signup}"><span th:text="#{signup.button.submit}"></span></a>
               <a class="dropdown-item" th:href="@{/logout}"><span th:text="#{label.logout}"></span></a>
             </div>
           </li>

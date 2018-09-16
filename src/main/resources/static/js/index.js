@@ -403,7 +403,7 @@ $(function() {
       },
     ondblClickRow: function(id) {
       if (!id.includes('inner')) {
-        $("#dlg").load("../?id="+id).dialog("open");
+        $("#dlg").load("/"+id).dialog("open");
       }
     },
     
@@ -431,7 +431,7 @@ $(function() {
           idPrefix: "inner",
           page: 1,
           colModel: [
-              { label: 'Reg Num', name:'id', index: 'id', formatter:'integer', width: 90, editable: true, editoptions: {disabled: true}},
+              { label: 'Reg Num', name:'id', index: 'id', formatter:'integer', width: 80, editable: true, editoptions: {disabled: true}},
               { label: 'Name', name: 'name', width: 200,editable: true,formoptions: {rowpos: 2, colpos: 1} },
               { label: 'Gender', name: 'gender', width: 60, align: 'center',editable: true, edittype: "select", editoptions: { value: "M:Male;F:Female" },formoptions: {rowpos: 2, colpos: 2}},
               { label: 'Date Of Birth', name: "dateOfBirth",index:"dateOfBirth",width:100,align:"center",sorttype:'date', formatter: 'date', formatoptions: {newformat: 'Y-m-d' }, formoptions: {rowpos: 3, colpos: 1},editable: true,

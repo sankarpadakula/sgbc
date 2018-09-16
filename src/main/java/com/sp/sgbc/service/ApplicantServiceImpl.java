@@ -31,6 +31,11 @@ public class ApplicantServiceImpl implements ApplicantService {
     return applicantRepository.findByEmail(email);
   }
 
+  public Applicant findApplicantByBsnNum(String bsnNum) {
+    return applicantRepository.findByBsnNum(bsnNum);
+  }
+
+  
   public Applicant save(Applicant applicant) {
     return applicantRepository.save(applicant);
   }
@@ -53,7 +58,8 @@ public class ApplicantServiceImpl implements ApplicantService {
   public Page<Applicant> findAll(Pageable pageable) {
     Page<Applicant> applicants = applicantRepository.findAll(pageable);
     for (Applicant applicant : applicants) {
-      calculateDueAndBuild(applicant);
+      if (applicant.getStartDate() != null)
+        calculateDueAndBuild(applicant);
     }
     return applicants;
   }

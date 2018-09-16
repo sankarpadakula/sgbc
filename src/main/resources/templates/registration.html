@@ -61,6 +61,7 @@
             <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span th:text="${currentUser}"></span></a>
             <div class="dropdown-menu">
               <a class="dropdown-item" th:href="@{/admin/home}"><span th:text="#{label.admin}"></span></a>
+              <a class="dropdown-item" th:href="@{/signup}"><span th:text="#{signup.button.submit}"></span></a>
               <a class="dropdown-item" th:href="@{/logout}"><span th:text="#{label.logout}"></span></a>
             </div>
           </li>
@@ -163,7 +164,7 @@
           </div> -->
           <div class="row" style="padding-left: 15px;">
             <div class="input-group" id="customFile">
-              <input type="file" class="custom-file-input" id="fileupload" th:field="*{docs}" onchange="$(this).next().after().text($(this).val().split('\\').slice(-1)[0])" th:title="#{registration.label.fileupload}">
+              <input type="file" class="custom-file-input" id="fileupload" th:field="*{docs}" onchange="$(this).next().after().text($(this).val().split('\\').slice(-1)[0])" th:title="#{registration.label.fileupload}" required>
               <label class="custom-file-label" for="fileupload" th:text="#{registration.label.fileupload}"></label>
             </div>
             <label for="fileupload" style="font-weight: lighter;margin-bottom: 0px;"><span th:text="#{registration.label.identificationTypes}"></span></label>
@@ -317,17 +318,17 @@
         </div>
       </fieldset>
 
-      <div th:if="${confirmationToken}" class="form-group" style="text-align: left">
+      <div th:if="${confirmationToken != null || user.id != null}" class="form-group" style="text-align: left">
         <label for="comment" th:text="#{registration.label.notes}"></label>
         <textarea class="form-control" rows="2" th:field="*{notes}" id="comment" name="notes"></textarea>
       </div>
 
       <div class="btn-group">
-        <div th:if="${confirmationToken == null}">
+        <div th:if="${confirmationToken == null && user.id == null}">
           <button type="submit" class="btn btn-primary" th:text="#{registration.button.register}"></button>
           <button type="reset" class="btn btn-primary" th:text="#{registration.button.reset}"></button>
         </div>
-        <div th:if="${confirmationToken}">
+        <div th:if="${confirmationToken != null || user.id != null}">
           <button id="approve" type="button" class="btn btn-primary" th:text="#{registration.button.approve}"></button>
           <button id="reject" type="button" class="btn btn-primary" th:text="#{registration.button.reject}"></button>
         </div>

@@ -1,5 +1,7 @@
 package com.sp.sgbc.controller;
 
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Date;
@@ -86,6 +88,13 @@ public class RegisterController {
     return modelAndView;
   }
 
+  @RequestMapping(value = "/{id}", method = GET)
+  public ModelAndView showApplicantPage(ModelAndView modelAndView, @PathVariable("id") Long id) {
+    Applicant applicant = applicantService.findOne(id);
+    modelAndView.addObject("user", applicant);
+    modelAndView.setViewName(REGISTRATION_PAGE);
+    return modelAndView;
+  }
   // Process form input data
   @RequestMapping(value = "/", method = RequestMethod.POST)
   public ModelAndView processRegistrationForm(ModelAndView modelAndView, @Valid Applicant user,
@@ -189,16 +198,19 @@ public class RegisterController {
         }
         applicantService.save(applicant);
       }
+      String subject = messageSource.getMessage("registration.confirmation.subject", null, DEFAULT_EMAIL_APP_RES,
+          LocaleContextHolder.getLocale());
+      String body = null;
       if (applicant.isActive()) {
-        String subject = messageSource.getMessage("registration.confirmation.subject", null, DEFAULT_EMAIL_APP_RES,
-            LocaleContextHolder.getLocale());
         int noOfPersons = 1;
         if (applicant.getPartner() != null) {
           noOfPersons = noOfPersons + 1;
         }
-        String body = buildApprovalConfirmationMessage(payPerPerson * noOfPersons, applicant);
-        emailService.sendHtmlEmail(subject, body, true, new String[] { applicant.getEmail() });
+        body = buildApprovalConfirmationMessage(payPerPerson * noOfPersons, applicant);
+      } else {
+         body = buildRejectRequestMessage(applicant);
       }
+      emailService.sendHtmlEmail(subject, body, true, new String[] { applicant.getEmail() });
     }
     modelAndView = new ModelAndView();
     // modelAndView.addObject("Results", applicantService.findAll());
@@ -214,14 +226,16 @@ public class RegisterController {
   }
 
   private void buildNewApplicantDefaults(Applicant user) {
-    if (user.getPartner() != null && (user.getPartner().getName() == null || user.getPartner().getName().isEmpty())) {
+    if (user.getPartner() == null || (user.getPartner().getName() == null || user.getPartner().getName().isEmpty())) {
       user.setPartner(null);
     } else {
       user.getPartner().setType(DependentType.Spouse);
     }
-    Dependent contact = user.getOtherContact();
-    if (contact != null) {
-      contact.setType(DependentType.OtherContact);
+    if (user.getOtherContact() == null || user.getOtherContact().getName() == null || user.getOtherContact().getName().isEmpty() ) {
+      user.setOtherContact(null);
+      user.setOtherContactAddress(null);
+    } else {
+      user.getOtherContact().setType(DependentType.OtherContact);;
     }
     if (user.getChildrens() != null) {
       for (Dependent kid : user.getChildrens()) {
@@ -257,6 +271,12 @@ public class RegisterController {
     return info;
   }
 
+  private String buildRejectRequestMessage(Applicant applicant) {
+    Map<String, Object> map = new HashMap<String, Object>();
+    map.put("applicant", applicant);
+    return mailContent.build("registrationRejection", map);
+  }
+  
   private String buildApprovalConfirmationMessage(int pay, Applicant user) {
     Map<String, Object> map = new HashMap<String, Object>();
     map.put("applicant", user);

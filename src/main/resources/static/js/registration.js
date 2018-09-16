@@ -38,7 +38,7 @@ $(function() {
     //Approve button action
     $('#approve').click( function() {
        $('#active').val(true);
-       $('#registration').attr('action', "admin/home").submit();
+       $('#registration').attr('action', "/admin/home").submit();
        /*$.ajax({
              url: "",
              type: 'post',
@@ -50,7 +50,7 @@ $(function() {
     //Reject button action
     $('#reject').click( function() {
        $('#active').val(false);
-       $('#registration').attr('action', "admin/home").submit();
+       $('#registration').attr('action', "/admin/home").submit();
     });
     
     var getQueryString = function ( field, url ) {

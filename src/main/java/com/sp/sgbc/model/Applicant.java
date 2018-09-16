@@ -21,6 +21,9 @@ import javax.persistence.TemporalType;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.sp.sgbc.configuration.CustomJsonDateSerializer;
+
 @Entity
 @Table(name = "applicant")
 public class Applicant {
@@ -45,6 +48,7 @@ public class Applicant {
 
   private String placeOfBirth;
 
+  @JsonDeserialize(using = CustomJsonDateSerializer.class)
   @DateTimeFormat(pattern = "yyyy-MM-dd")
   @Temporal(TemporalType.DATE)
   private Date dateOfBirth;

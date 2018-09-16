@@ -3838,6 +3838,10 @@ table.table-mail tr td {
   background-color: #23c6c8;
   color: #ffffff;
 }
+.crystal-blue {
+	 background-color: #5CB3FF;
+  color: #ffffff;
+}
 .yellow-bg,
 .bg-warning {
   background-color: #f8ac59;

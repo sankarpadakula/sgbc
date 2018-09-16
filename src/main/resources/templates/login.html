@@ -57,7 +57,7 @@
         <div class="col-md-6">
           <button type="submit" class="btn btn-primary block full-width m-b"><strong th:utext="#{label.login}" ></strong></button>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-6" th:if="${currentUser != null}">
           <h4 class="text-center"><a th:href="@{/signup}"><span th:text="#{signup.button.submit}"></span></a></h4>
         </div>
         </div>

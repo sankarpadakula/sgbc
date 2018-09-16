@@ -29,7 +29,7 @@ public class MailContentBuilder {
     return templateEngine.process("email/" + template, context);
   }
 
-  public String buildPDF(String body) {
+  public String includeTemplate(String body) {
     Context context = new Context();
     context.setVariable("date", dateformat.format(new Date()));
     context.setVariable("body", body);
