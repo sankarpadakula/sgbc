@@ -15,18 +15,18 @@
 <title>SignUp Page</title>
 </head>
 
-<body class="gray-bg">
+<body class="colors-bg">
 
   <div class="middle-box text-center loginscreen animated fadeInDown">
   <div class="form-group row">
-      <h2><a class="col-md-2" th:href="@{/}"><span class="fa fa-home fa-lg"></span></a></h2>
-      <h2 class="col-md-2" style="padding-right:2px;margin-top: 2px;"><strong th:utext="#{signup.title}"></strong></h2>
+      <a class="col-md-5" th:href="@{/}"><img src="./images/logo.png"/></a>
       <div class="col-md-7" style="text-align: right;padding:0px;margin:2px 0px;">
         <a th:href="@{/signup?lang=en}"><span th:text="#{label.english}"></span></a>&nbsp;|&nbsp;
         <a th:href="@{/signup?lang=nl}"><span th:text="#{label.dutch}"></span></a>&nbsp;|&nbsp;
         <a th:href="@{/signup?lang=ur}"><span th:text="#{label.urdu}"></span></a>
       </div>
   </div>
+   <div><h2 style="padding:0px;margin: 0px;"><strong th:utext="#{signup.title}"></strong></h2></div>
       <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text=${successMessage}></div>
       <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text=${errorMessage}></div>
 

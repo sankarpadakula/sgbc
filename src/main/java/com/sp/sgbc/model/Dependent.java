@@ -11,19 +11,25 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sp.sgbc.util.DependentType;
 
 @Entity
 @Table(name = "dependent")
+@JsonIgnoreProperties(value = { "docs" })
 public class Dependent {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
 
   @ManyToOne(cascade = CascadeType.ALL)
+  @JsonBackReference
   private Applicant applicant;
 
   private String name;
@@ -42,6 +48,11 @@ public class Dependent {
   
   private String phone;
 
+  @Transient
+  private MultipartFile docs;
+  
+  private String fileName;
+  
   private Boolean active;
 
   private boolean remainder;
@@ -176,6 +187,22 @@ public class Dependent {
 
   public void setPhone(String phone) {
     this.phone = phone;
+  }
+
+  public MultipartFile getDocs() {
+    return docs;
+  }
+
+  public void setDocs(MultipartFile docs) {
+    this.docs = docs;
+  }
+
+  public String getFileName() {
+    return fileName;
+  }
+
+  public void setFileName(String fileName) {
+    this.fileName = fileName;
   }
 
 }

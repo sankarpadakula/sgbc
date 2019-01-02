@@ -62,6 +62,18 @@ public class Helper {
     }
   }
 
+  public static String getFileExtension(String fileName) {
+    String extension = "";
+    try {
+      if (fileName != null) {
+        extension = fileName.substring(fileName.lastIndexOf("."));
+      }
+    } catch (Exception e) {
+      extension = "";
+    }
+    return extension;
+
+  }
   public static byte[] createPdf(String content) throws IOException {
     ByteArrayOutputStream stream = new ByteArrayOutputStream();
     HtmlConverter.convertToPdf(content, stream);

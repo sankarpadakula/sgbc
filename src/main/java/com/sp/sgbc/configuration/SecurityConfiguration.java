@@ -41,7 +41,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.antMatchers("/signup").permitAll()
 				.antMatchers("/terms-and-conditions").permitAll()
 				//.antMatchers("/admin/applicants").permitAll() // to delete
-				.antMatchers("/confirm").hasAuthority("ADMIN")
+				.antMatchers("/confirm").permitAll()
+				.antMatchers("/files/**").permitAll()
 				.antMatchers("/admin/**").hasAuthority("ADMIN").anyRequest()
 				.authenticated().and().csrf().disable().formLogin()
 				.loginPage("/login").failureUrl("/login?error=true")
@@ -58,7 +59,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	public void configure(WebSecurity web) throws Exception {
 	    web
 	       .ignoring()
-	       .antMatchers("/resources/**", "/static/**", "/css/**", "/js/**", "/fonts/**","/images/**", "*.pdf");
+	       .antMatchers("/resources/**", "/static/**", "/css/**", "/js/**", "/fonts/**","/images/**", "*.pdf","*.png");
 	}
 	
 	@Bean

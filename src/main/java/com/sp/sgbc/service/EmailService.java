@@ -43,7 +43,12 @@ public class EmailService {
 
   @Async
   public void sendEmail(MimeMessagePreparator email) {
-     //mailSender.send(email);
+    try {
+      mailSender.send(email);
+    } catch (Exception e) {
+      LOGGER.error("*****************Email server is not configured properly", e);
+    }
+
   }
 
   public void sendHtmlEmail(final String subject, final String body) {
@@ -57,7 +62,7 @@ public class EmailService {
   public void sendEmail(final String subject, final String body) {
     sendEmail(subject, body, new String[] {});
   }
-      
+
   public void sendEmail(final String subject, final String body, final String... to) {
     MimeMessagePreparator preparator = new MimeMessagePreparator() {
       public void prepare(MimeMessage mimeMessage) throws Exception {

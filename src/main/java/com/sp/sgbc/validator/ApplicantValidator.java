@@ -35,12 +35,16 @@ public class ApplicantValidator implements Validator {
   public void validate(Object o, Errors errors) {
     Applicant app = (Applicant) o;
 
-    ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "NotEmpty");
+    ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "Applicant Name Not Empty");
     Locale locale = LocaleContextHolder.getLocale();
     if (applicantService.findApplicantByBsnNum(app.getBsnNum()) != null) {
-      String message = messageSource.getMessage("registration.user.exist", null, "Duplicate user/email", locale);
+      String message = messageSource.getMessage("registration.user.exist", null, "User exist with same BSN number", locale);
       errors.rejectValue("name", message);
       return;
+    }
+    if ((app.getDocs() == null || app.getDocs().getOriginalFilename().isEmpty()) && (app.getFileName()== null || app.getFileName().isEmpty())) {
+      String message = messageSource.getMessage("registration.docs.missing", null, "Applicant Proof Document is missed", locale);
+      errors.rejectValue("docs", message);
     }
     if (app.getPartner() != null && "Married".equals(app.getMaritalStatus())) {
       try {

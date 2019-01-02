@@ -12,10 +12,10 @@ import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -39,6 +39,7 @@ import com.sp.sgbc.service.ApplicantService;
 import com.sp.sgbc.service.DependentService;
 import com.sp.sgbc.service.SchedulerService;
 import com.sp.sgbc.service.TransactionService;
+import com.sp.sgbc.util.Helper;
 
 @RestController
 @RequestMapping("/rest")
@@ -52,7 +53,7 @@ public class ApplicantRestController {
 
   @Autowired
   private DependentService dependentService;
-  
+
   @Autowired
   SchedulerService schedulerService;
 
@@ -62,6 +63,7 @@ public class ApplicantRestController {
   }
 
   @RequestMapping(method = GET)
+  @Transactional
   public ViewPage<Applicant> listApplicants(Pageable page) {
     Page<Applicant> applicants = applicantService.findAll(page);
     return new ViewPage<Applicant>(applicants);
@@ -71,16 +73,13 @@ public class ApplicantRestController {
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void updateApplicant(@PathVariable("id") Long id, @RequestBody Applicant applicant) {
     if (applicantService.exists(id)) {
-      Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       applicant.setId(id);
-      applicant.setModifiedBy(auth.getName());
-      applicant.setModifiedDate(new Date());
+      if (applicant.getStartDate() == null && applicant.isActive())
+        applicant.setStartDate(Helper.getNextMonthStartDate());
       applicantService.save(applicant);
       if (!applicant.isActive()) {
         List<Dependent> dependents = dependentService.getDependentsByApplicantId(id);
         for (Dependent dependent : dependents) {
-          dependent.setModifiedBy(auth.getName());
-          dependent.setModifiedDate(new Date());
           dependent.setActive(false);
         }
         dependentService.save(dependents);
@@ -101,16 +100,11 @@ public class ApplicantRestController {
   @RequestMapping(value = "/{id}", method = DELETE)
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void disableApplicant(@PathVariable("id") Long id) {
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     Applicant applicant = applicantService.findOne(id);
-    applicant.setModifiedBy(auth.getName());
-    applicant.setModifiedDate(new Date());
     applicant.setActive(false);
 
     List<Dependent> dependents = dependentService.getDependentsByApplicantId(id);
     for (Dependent dependent : dependents) {
-      dependent.setModifiedBy(auth.getName());
-      dependent.setModifiedDate(new Date());
       dependent.setActive(false);
     }
     dependentService.save(dependents);
@@ -132,9 +126,6 @@ public class ApplicantRestController {
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void updateDependent(@PathVariable("id") Long id, @RequestBody Dependent dependent) {
     if (dependentService.exists(id)) {
-      Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-      dependent.setModifiedBy(auth.getName());
-      dependent.setModifiedDate(new Date());
       dependent.setId(id);
       dependentService.save(dependent);
     }
@@ -143,9 +134,6 @@ public class ApplicantRestController {
   @RequestMapping(value = "/dependents/{id}", method = POST)
   public ResponseEntity<String> createDependent(HttpServletRequest request, @PathVariable("id") Long id,
       @RequestBody Dependent dependent) {
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    dependent.setModifiedBy(auth.getName());
-    dependent.setModifiedDate(new Date());
     dependent.setApplicant(applicantService.findOne(id));
     dependent = dependentService.save(dependent);
 
@@ -159,9 +147,6 @@ public class ApplicantRestController {
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void disableDependent(@PathVariable("id") Long id) {
     Dependent dependent = dependentService.findOne(id);
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    dependent.setModifiedBy(auth.getName());
-    dependent.setModifiedDate(new Date());
     dependent.setActive(false);
     dependentService.save(dependent);
   }
@@ -205,9 +190,6 @@ public class ApplicantRestController {
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void updateTransaction(@PathVariable("id") Long id, @RequestBody Transaction transaction) {
     if (transactionService.exists(id)) {
-      Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-      transaction.setModifiedBy(auth.getName());
-      transaction.setModifiedDate(new Date());
       transaction.setId(id);
       transactionService.save(transaction);
     }
@@ -217,9 +199,6 @@ public class ApplicantRestController {
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void disableTransaction(@PathVariable("id") Long id) {
     Transaction transaction = transactionService.findOne(id);
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    transaction.setModifiedBy(auth.getName());
-    transaction.setModifiedDate(new Date());
     transaction.setActive(false);
     transactionService.save(transaction);
   }
@@ -229,57 +208,5 @@ public class ApplicantRestController {
   public void processTransactionFile() {
     schedulerService.processTransactionFile();
   }
-  
-  /*
-  private Page<Applicant> build() {
-    List<Applicant> list = new ArrayList<>();
-    for (int i = 1; i < 11; i++) {
-      list.add(build(i));
-    }
-    return new PageImpl(list);
-  }
 
-  private Applicant build(long i) {
-    Applicant applicant = new Applicant();
-    applicant.setId(11l + i);
-    applicant.setName("griduser" + i);
-    applicant.setEmail("sankar@gmail.com" + i);
-    applicant.setPhone("12345" + i);
-    applicant.setMaritalStatus("Single");
-    applicant.setStartDate(new Date());
-    applicant.setInitBalance(1000.22 * i);
-    applicant.setCloseBalance(900 * i);
-    applicant.setActive(false);
-    applicant.setChildrens(buildDeps(i));
-    return applicant;
-  }
-
-  private Transaction buildTrans(long i) {
-    Transaction applicant = new Transaction();
-    applicant.setId(11l + i);
-    applicant.setApplicantId(11l + i);
-    applicant.setTransactionId("trans" + i);
-    applicant.setAmountPaid(10d + i);
-    applicant.setTransactionDate(new Date());
-    return applicant;
-  }
-
-  private List<Dependent> buildDeps(Long id) {
-    List<Dependent> trans = new ArrayList<Dependent>();
-    for (int i = 0; i <= 4; i++) {
-      trans.add(buildDep(id + i));
-    }
-    return trans;
-  }
-
-  private Dependent buildDep(long i) {
-    Dependent applicant = new Dependent();
-    applicant.setId(11l + i);
-    applicant.setName("dep" + i);
-    applicant.setRemainder(false);
-    applicant.setActive(true);
-    applicant.setDateOfBirth(new Date());
-    applicant.setGender("M");
-    return applicant;
-  }*/
 }

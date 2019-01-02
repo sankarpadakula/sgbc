@@ -10,27 +10,32 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.sp.sgbc.configuration.CustomJsonDateSerializer;
 
 @Entity
 @Table(name = "applicant")
+@JsonIgnoreProperties(value = { "docs" })
 public class Applicant {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  @Column(name = "id")
+  @SequenceGenerator(name = "APPLICANT_REG", sequenceName = "APPLICANT_REG", initialValue=1100000)
+  @GeneratedValue(generator = "APPLICANT_REG", strategy = GenerationType.SEQUENCE)
+  @Column(unique = true, nullable = false)
   private Long id;
 
   @Column(name = "name")
@@ -39,7 +44,7 @@ public class Applicant {
   @ManyToOne(cascade = CascadeType.ALL)
   private Address address;
 
-  @Column(name = "email", nullable = false, unique = true)
+  @Column(name = "email", nullable = false)
   private String email;
 
   private String phone;
@@ -69,6 +74,7 @@ public class Applicant {
   private Address otherContactAddress;
 
   @OneToMany(cascade = CascadeType.ALL, mappedBy = "applicant")
+  @JsonManagedReference
   private List<Dependent> childrens = new ArrayList<Dependent>();
 
   private String notes;
@@ -77,14 +83,10 @@ public class Applicant {
 
   private boolean active;
 
-  private transient MultipartFile docs;
+  @Transient
+  private MultipartFile docs;
 
   private String fileName;
-
-  @Lob
-  private byte[] fileData;
-
-  private String confirmationToken;
 
   @DateTimeFormat(pattern = "dd/MM/yyyy")
   private Date startDate;
@@ -101,9 +103,14 @@ public class Applicant {
   @Temporal(TemporalType.DATE)
   private Date modifiedDate;
 
-  private transient double initBalance;
-  private transient double closeBalance;
-
+  @Transient
+  private double initBalance;
+  @Transient
+  private double closeBalance;
+  @Transient
+  private transient String formatedId;
+  @Transient
+  private transient String token;
   public Address getAddress() {
     return address;
   }
@@ -120,12 +127,13 @@ public class Applicant {
     this.notes = notes;
   }
 
-  public String getConfirmationToken() {
-    return confirmationToken;
-  }
-
-  public void setConfirmationToken(String confirmationToken) {
-    this.confirmationToken = confirmationToken;
+  public String getFormatedId() {
+    if (id != null) {
+      String num = Long.toString(id);
+      if (num.length() > 3)
+        return num.substring(0, 2) + "-" + num.substring(num.length() - 2, num.length());
+    }
+    return id + "";
   }
 
   public Long getId() {
@@ -299,22 +307,6 @@ public class Applicant {
     this.startDate = startDate;
   }
 
-  public String getFileName() {
-    return fileName;
-  }
-
-  public void setFileName(String fileName) {
-    this.fileName = fileName;
-  }
-
-  public byte[] getFileData() {
-    return fileData;
-  }
-
-  public void setFileData(byte[] fileData) {
-    this.fileData = fileData;
-  }
-
   public double getInitBalance() {
     return initBalance;
   }
@@ -337,6 +329,22 @@ public class Applicant {
 
   public void setCreatedBy(String createdBy) {
     this.createdBy = createdBy;
+  }
+
+  public String getFileName() {
+    return fileName;
+  }
+
+  public void setFileName(String fileName) {
+    this.fileName = fileName;
+  }
+
+  public String getToken() {
+    return token;
+  }
+
+  public void setToken(String token) {
+    this.token = token;
   }
 
 }

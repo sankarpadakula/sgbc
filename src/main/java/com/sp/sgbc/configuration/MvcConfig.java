@@ -48,5 +48,5 @@ public class MvcConfig implements WebMvcConfigurer {
         msgSrc.setDefaultEncoding("UTF-8");
         return msgSrc;
     }
-    
+
 }

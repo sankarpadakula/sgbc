@@ -1,9 +1,15 @@
 package com.sp.sgbc.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.sp.sgbc.model.Applicant;
@@ -27,7 +33,8 @@ public class DependentService {
   public Dependent findOne(Long id) {
     return dependentRepository.findById(id).orElse(null);
   }
-
+  
+  @Transactional(value = TxType.REQUIRES_NEW)
   public List<Dependent> getDependentsByApplicantId(Long appId) {
     Applicant applicant = applicantRepository.findById(appId).orElse(new Applicant());
     Dependent partner = applicant.getPartner();
@@ -65,6 +72,12 @@ public class DependentService {
   }
 
   public void save(List<Dependent> dependents) {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    for (Dependent dependent : dependents) {
+      if (auth != null)
+      dependent.setModifiedBy(auth.getName());
+      dependent.setModifiedDate(new Date());
+    }
     dependentRepository.saveAll(dependents);
   }
 

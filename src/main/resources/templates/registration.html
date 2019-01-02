@@ -18,6 +18,7 @@
 <style type="text/css">
 .radio-inline {
   padding-right: 15px;
+  color:white;
 }
 
 .input-group {
@@ -43,17 +44,20 @@
 }
 
 .logo {
-   /*  background-image: url(./images/logo.png); */
+   background-image: url(/images/logo.png);
    background-repeat: no-repeat;
     background-origin: content-box;
+}
+h2 {
+  color:antiquewhite
 }
 </style>
 
 </head>
 
-<body class="gray-bg">
+<body class="colors-bg">
 
-  <div class="middle-box text-center animated fadeInDown logo" style="padding-top: 0px;">
+  <div class="container text-center animated fadeInDown bg-image" style="padding-top: 0px;">
 
     <div class="row pull-right" style="padding: 0px; margin: 2px 0px;">
       <ul th:if="${currentUser}" class="nav">
@@ -82,7 +86,7 @@
       <div id="validationMessage" th:if="${validationMessage}" class="alert alert-danger" role="alert" th:text="${validationMessage}"></div>
 
       <input type="hidden" id="active" name="active" value=false></input>
-      <input type="hidden" id="confirmationToken" name="confirmationToken" th:field="*{confirmationToken}"></input>
+      <input type="hidden" id="token" th:field="*{token}" name="token" th:text="${confirmationToken}"></input>
       <fieldset class="fieldset">
         <div class="form-group" style="margin-bottom: 0px;">
           <h4 class="text-left" th:text="#{registration.label.personal}"></h4>
@@ -164,16 +168,18 @@
           </div> -->
           <div class="row" style="padding-left: 15px;">
             <div class="input-group" id="customFile">
-              <input type="file" class="custom-file-input" id="fileupload" th:field="*{docs}" onchange="$(this).next().after().text($(this).val().split('\\').slice(-1)[0])" th:title="#{registration.label.fileupload}" required>
-              <label class="custom-file-label" for="fileupload" th:text="#{registration.label.fileupload}"></label>
+            <input type="hidden" th:field="*{docs}" th:value="*{docs}" ></input>
+              <input type="file" class="custom-file-input" id="mainfileupload" th:field="*{docs}" th:value="*{docs}" onchange="$(this).siblings('a').remove();$(this).next().after().text($(this).val().split('\\').slice(-1)[0]);" th:title="#{registration.label.fileupload}">
+              <label class="custom-file-label" for="mainfileupload" th:text="*{fileName}"></label>
+              <input type="hidden" th:field="*{fileName}"></input>
+              <a th:field="*{fileName}" class="downlink" th:href="@{/files/__${confirmationToken == null ?id:confirmationToken}__(file=*{fileName},bsnNum=*{bsnNum})}" th:text="*{fileName}" ></a>
             </div>
-            <label for="fileupload" style="font-weight: lighter;margin-bottom: 0px;"><span th:text="#{registration.label.identificationTypes}"></span></label>
+            <!-- <a th:href="@{/files/__${confirmationToken}__/parent(file=*{fileName})}" data-method="delete" ><span class="fa fa-trash-o fa-lg"></span></a> -->
+            <label for="mainfileupload" style="font-weight: lighter;margin-bottom: 0px;"><span th:text="#{registration.label.identificationTypes}"></span></label>
           </div>
         </div>
       </fieldset>
-      <div class="form-group input-group" style="text-align: left;">
-        <a th:href="@{/files/__${user.id}__(file=*{fileName})}" th:text="*{fileName}" ></a>
-      </div>
+     
 
       <fieldset class="fieldset">
         <!-- Partner Details -->
@@ -211,7 +217,14 @@
                 <span class="input-group-addon"><i class="fa fa-vcard-o fa-fw"></i></span>
                 <input id="bsn" type="text" class="form-control" th:field="*{partner.bsnNum}" name="partner.bsnNum" th:placeholder="#{registration.label.bsn}" data-toggle="tooltip" th:title="#{registration.label.bsn}">
               </div>
+              <div class="col-md-6 input-group" id="customFile" >
+                <input id="fileupload" type="file" style="margin-left:15px;" class="custom-file-input" th:field="*{partner.docs}" onchange="$(this).parent().parent().siblings('a').remove();$(this).next().after().text($(this).val().split('\\').slice(-1)[0])" th:title="#{registration.label.fileupload}"></input>
+                <label class="custom-file-label" for="fileupload" th:text="*{partner.fileName}" style="text-align:left;margin-left:15px;"></label>
+              </div>
             </div>
+            <input type="hidden" th:field="*{partner.fileName}"></input>
+            <a th:href="@{/files/__${confirmationToken == null ?id:confirmationToken}__(file=*{partner.fileName},bsnNum=*{partner.bsnNum})}" th:text="*{partner.fileName}" ></a>
+            <label for="fileupload" style="font-weight: lighter;margin-bottom: 0px;"><span th:text="#{registration.label.identificationTypes}"></span></label>
           </div>
         </div>
 
@@ -256,7 +269,14 @@
                 <span class="input-group-addon"><i class="fa fa-vcard-o fa-fw"></i></span>
                 <input id="msg" type="text" class="form-control" th:field="*{childrens[__${rowStat.index}__].bsnNum}" th:placeholder="#{registration.label.bsn}" data-toggle="tooltip" th:title="#{registration.label.bsn}">
               </div>
+              <div class="col-md-6 input-group" id="customFile">
+                <input type="file" class="custom-file-input" id="kidfileupload__${rowStat.index}__" th:field="*{childrens[__${rowStat.index}__].docs}" onchange="$(this).parent().parent().siblings('a').remove();$(this).next().after().text($(this).val().split('\\').slice(-1)[0])" th:title="#{registration.label.fileupload}">
+                <label class="custom-file-label" for="kidfileupload__${rowStat.index}__" th:text="*{childrens[__${rowStat.index}__].fileName}" style="text-align:left"></label>
+              </div>
             </div>
+            <input type="hidden" th:field="*{childrens[__${rowStat.index}__].fileName}"></input>
+            <a th:href="@{/files/__${confirmationToken == null ?id:confirmationToken}__(file=*{childrens[__${rowStat.index}__].fileName},bsnNum=*{childrens[__${rowStat.index}__].bsnNum})}" th:text="*{childrens[__${rowStat.index}__].fileName}" ></a>
+            <label for="kidfileupload__${rowStat.index}__" style="font-weight: lighter;margin-bottom: 0px;"><span th:text="#{registration.label.identificationTypes}"></span></label>
           </div>
         </div>
 
@@ -318,17 +338,18 @@
         </div>
       </fieldset>
 
-      <div th:if="${confirmationToken != null || user.id != null}" class="form-group" style="text-align: left">
+      <div th:if="${currentUser != null and confirmationToken != null}" class="form-group" style="text-align: left">
         <label for="comment" th:text="#{registration.label.notes}"></label>
         <textarea class="form-control" rows="2" th:field="*{notes}" id="comment" name="notes"></textarea>
       </div>
 
       <div class="btn-group">
-        <div th:if="${confirmationToken == null && user.id == null}">
+        <div th:if="${currentUser == null}">
           <button type="submit" class="btn btn-primary" th:text="#{registration.button.register}"></button>
           <button type="reset" class="btn btn-primary" th:text="#{registration.button.reset}"></button>
+          <a th:if="${confirmationToken != null}" th:href="@{/}" class="btn btn-primary" th:text="#{registration.button.clear}"></a>
         </div>
-        <div th:if="${confirmationToken != null || user.id != null}">
+        <div th:if="${currentUser !=null}">
           <button id="approve" type="button" class="btn btn-primary" th:text="#{registration.button.approve}"></button>
           <button id="reject" type="button" class="btn btn-primary" th:text="#{registration.button.reject}"></button>
         </div>

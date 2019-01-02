@@ -109,15 +109,12 @@ $(function() {
         name:'id',
         label: 'Reg Num',
         index: 'id',
-        formatter:'showlink',
-        formatoptions : {
-          baseLinkUrl : '../',
-          idName : 'id',
-          target : '_blank'
-        },
+        formatter:function(cellvalue, options, rowObject) {
+            return cellvalue.toString().substring(0,2)+'-'+cellvalue.toString().substring(2);
+          },
         width: 90,
         editable: true,
-        editoptions: {disabled: true, size:5}
+        editoptions: {disabled: true, thousandsSeparator: "-", size:10}
       },
       {
         name:'name',
@@ -396,8 +393,9 @@ $(function() {
     height: 'auto',
     onSelectRow: function(rowid, selected) {
         if(rowid != null) {
+          var row = $(this).getRowData(rowid);
           jQuery("#transactionGrid").jqGrid('setGridParam',{url: TRANSACTION_URL + rowid, editurl:TRANSACTION_URL + rowid, datatype: 'json'});
-          jQuery("#transactionGrid").jqGrid('setCaption', 'Transactions ::'+rowid);
+          jQuery("#transactionGrid").jqGrid('setCaption', 'Transactions ::'+rowid.substr(0, 2)+'-'+rowid.substr(2)+' ('+row.name+')');
           jQuery("#transactionGrid").trigger("reloadGrid");
         }
       },
@@ -552,11 +550,12 @@ $(function() {
       caption: "Transactions",
       pager : '#transactionGridPager',
       height: 'auto',
+      width: 800,
       rownumbers: true,
       rownumWidth: 35,
       footerrow: true,
       userDataOnFooter: true,
-
+      viewrecords: true,
       onSelectRow: function(rowid, selected) {
         if(rowid != null) {
 
@@ -565,8 +564,9 @@ $(function() {
       ondblClickRow: function(id) {
         jQuery(this).jqGrid('editGridRow', id, editTransOptions);
       }
+      
     };
-
+  
     $("#transactionGrid")
         .jqGrid(transOptions)
         .navGrid('#transactionGridPager',
@@ -576,6 +576,7 @@ $(function() {
         delTransOptions,
         {} // search options
     );
+    setPrintGrid('transactionGrid','transactionGridPager');
     
     $('#processTrans').click( function() {
         //$('#registration').attr('action', "admin/home").submit();
@@ -584,4 +585,33 @@ $(function() {
               type: 'get'
         });
      });
+    
+ // setup grid print capability. Add print button to navigation bar and bind to click.
+    function setPrintGrid(gid,pid){
+      // print button title.
+      var btnTitle = 'Print Grid';
+      
+      // setup print button in the grid top navigation bar.
+      $('#'+gid).jqGrid('navSeparatorAdd','#'+gid+'_toppager_left', {sepclass :'ui-separator'});
+      $('#'+gid).jqGrid('navButtonAdd','#'+gid+'_toppager_left', {caption: '', title: btnTitle, position: 'last', buttonicon: 'ui-icon-print', onClickButton: function() {PrintGrid(gid);} });
+
+      // setup print button in the grid bottom navigation bar.
+      $('#'+gid).jqGrid('navSeparatorAdd','#'+pid, {sepclass : "ui-separator"});
+      $('#'+gid).jqGrid('navButtonAdd','#'+pid, {caption: '', title: btnTitle, position: 'last', buttonicon: 'ui-icon-print', onClickButton: function() { PrintGrid(gid);} });
+
+      function PrintGrid(gid){
+       // empty the print div container.
+       $('#prt-container').empty();
+       var pgTitle = $("#"+gid).jqGrid("getGridParam", "caption");
+       // copy and append grid view to print div container.
+       $('#gview_'+gid).clone().appendTo('#prt-container').css({'page-break-after':'auto'});
+
+       // remove navigation divs.
+       $('#prt-container div').remove('.ui-jqgrid-toppager,.ui-jqgrid-titlebar,.ui-jqgrid-pager');
+
+       // print the contents of the print container.
+       $('#prt-container').printElement({pageTitle:pgTitle, overrideElementCSS:[{ href:'css/print-grid.css',media:'print'}]});
+       $('#prt-container').empty();
+      }
+    }
 });

@@ -13,14 +13,14 @@ import com.sp.sgbc.repository.UserRepository;
 public class CurrentUserControllerAdvice {
   @Autowired
   UserRepository userRepository;
-  
-    @ModelAttribute("currentUser")
-    public String getCurrentUser(Authentication authentication) {
-     if (authentication != null) {
+
+  @ModelAttribute("currentUser")
+  public String getCurrentUser(Authentication authentication) {
+    if (authentication != null) {
       User user = userRepository.findByEmail(((UserDetails) authentication.getPrincipal()).getUsername());
-      if (user != null) //has to remove
+      if (user != null) // has to remove
         return user.getName();
-      }
-        return null;
     }
+    return null;
+  }
 }
