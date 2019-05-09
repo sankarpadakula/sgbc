@@ -3,6 +3,7 @@
 
 <head>
 <title>User Registration</title>
+<link rel="shortcut icon" href="./images/logo.png" type="image/png">
 <meta charset="utf-8" />
 <meta name="context-path" th:content="@{/}" />
 <meta name="ctx" th:content="${#httpServletRequest.getContextPath()}" />
@@ -44,7 +45,7 @@
 }
 
 .logo {
-   background-image: url(/images/logo.png);
+   background-image: url(../images/logo.png);
    background-repeat: no-repeat;
     background-origin: content-box;
 }
@@ -86,7 +87,7 @@ h2 {
       <div id="validationMessage" th:if="${validationMessage}" class="alert alert-danger" role="alert" th:text="${validationMessage}"></div>
 
       <input type="hidden" id="active" name="active" value=false></input>
-      <input type="hidden" id="token" th:field="*{token}" name="token" th:text="${confirmationToken}"></input>
+      <input type="hidden" id="token" th:field="*{token}" name="token"></input>
       <fieldset class="fieldset">
         <div class="form-group" style="margin-bottom: 0px;">
           <h4 class="text-left" th:text="#{registration.label.personal}"></h4>
@@ -99,8 +100,8 @@ h2 {
               </div>
             </div>
             <div class="col-md-3 row">
-              <label class="radio-inline"><input type="radio" name="gender" th:field="*{gender}" value="M" th:text="#{registration.label.male}" data-toggle="tooltip" th:title="#{registration.tooltip.genderMale}" required></label>
-              <label class="radio-inline" style="margin-left: 0px;"><input type="radio" name="gender" th:field="*{gender}" value="F" th:text="#{registration.label.female}" data-toggle="tooltip" th:title="#{registration.tooltip.genderFemale}"></label>
+              <label class="radio-inline"><input type="radio" name="gender" th:field="*{gender}" value="Male" th:text="#{registration.label.male}" data-toggle="tooltip" th:title="#{registration.tooltip.genderMale}" required></label>
+              <label class="radio-inline" style="margin-left: 0px;"><input type="radio" name="gender" th:field="*{gender}" value="Female" th:text="#{registration.label.female}" data-toggle="tooltip" th:title="#{registration.tooltip.genderFemale}"></label>
             </div>
           </div>
 
@@ -196,8 +197,8 @@ h2 {
                 </div>
               </div>
               <div class="col-md-3 row">
-                <label class="radio-inline"><input id="male" type="radio" th:field="*{partner.gender}" name="partner.gender" value="M" th:text="#{registration.label.male}" data-toggle="tooltip" th:title="#{registration.tooltip.genderMale}"></label>
-                <label class="radio-inline"><input id="female" type="radio" th:field="*{partner.gender}" name="partner.gender" value="F" th:text="#{registration.label.female}" data-toggle="tooltip" th:title="#{registration.tooltip.genderFemale}"></label>
+                <label class="radio-inline"><input id="male" type="radio" th:field="*{partner.gender}" name="partner.gender" value="Male" th:text="#{registration.label.male}" data-toggle="tooltip" th:title="#{registration.tooltip.genderMale}"></label>
+                <label class="radio-inline"><input id="female" type="radio" th:field="*{partner.gender}" name="partner.gender" value="Female" th:text="#{registration.label.female}" data-toggle="tooltip" th:title="#{registration.tooltip.genderFemale}"></label>
               </div>
             </div>
 
@@ -248,8 +249,8 @@ h2 {
                 </div>
               </div>
               <div class="col-md-3 row">
-                <label class="radio-inline"><input type="radio" th:field="*{childrens[__${rowStat.index}__].gender}" name="partGen" value="M" th:text="#{registration.label.male}" data-toggle="tooltip" th:title="#{registration.tooltip.genderMale}"></label>
-                <label class="radio-inline"><input type="radio" th:field="*{childrens[__${rowStat.index}__].gender}" name="partGen" value="F" th:text="#{registration.label.female}" data-toggle="tooltip" th:title="#{registration.tooltip.genderFemale}"></label>
+                <label class="radio-inline"><input type="radio" th:field="*{childrens[__${rowStat.index}__].gender}" name="partGen" value="Male" th:text="#{registration.label.male}" data-toggle="tooltip" th:title="#{registration.tooltip.genderMale}"></label>
+                <label class="radio-inline"><input type="radio" th:field="*{childrens[__${rowStat.index}__].gender}" name="partGen" value="Female" th:text="#{registration.label.female}" data-toggle="tooltip" th:title="#{registration.tooltip.genderFemale}"></label>
               </div>
             </div>
 
@@ -293,8 +294,8 @@ h2 {
               </div>
             </div>
             <div class="col-md-3 row">
-              <label class="radio-inline"><input type="radio" name="otherContactGender" th:field="*{otherContact.gender}" value="M" th:text="#{registration.label.male}" data-toggle="tooltip" th:title="#{registration.tooltip.genderMale}"></label>
-              <label class="radio-inline"><input type="radio" name="otherContactGender" th:field="*{otherContact.gender}" value="F" th:text="#{registration.label.female}" data-toggle="tooltip" th:title="#{registration.tooltip.genderFemale}"></label>
+              <label class="radio-inline"><input type="radio" name="otherContactGender" th:field="*{otherContact.gender}" value="Male" th:text="#{registration.label.male}" data-toggle="tooltip" th:title="#{registration.tooltip.genderMale}"></label>
+              <label class="radio-inline"><input type="radio" name="otherContactGender" th:field="*{otherContact.gender}" value="Female" th:text="#{registration.label.female}" data-toggle="tooltip" th:title="#{registration.tooltip.genderFemale}"></label>
             </div>
           </div>
 

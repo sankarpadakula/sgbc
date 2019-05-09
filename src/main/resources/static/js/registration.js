@@ -1,7 +1,6 @@
 $(function() {
 
    /* $('.date').click( function() {
-      alert("hi");
          $(this).datepicker({
           format : 'dd/mm/yyyy',
           autoclose : true
@@ -41,7 +40,10 @@ $(function() {
     $('#approve').click( function() {
        $('#active').val(true);
        $('#token').val(getQueryString('token'));
-       $('#registration').attr('action', "/admin/home").submit();
+       if (window.location.pathname.indexOf("admin/home") > -1)
+         $('#registration').attr('action', "../admin/home").submit();
+       else
+         $('#registration').attr('action', "admin/home").submit();
        /*$.ajax({
              url: "",
              type: 'post',
@@ -54,7 +56,10 @@ $(function() {
     $('#reject').click( function() {
        $('#active').val(false);
        $('#token').val(getQueryString('token'));
-       $('#registration').attr('action', "/admin/home").submit();
+       if (window.location.pathname.indexOf("admin/home") > -1)
+         $('#registration').attr('action', "../admin/home").submit();
+       else
+         $('#registration').attr('action', "admin/home").submit();
     });
     var getQueryString = function ( field, url ) {
       var href = url ? url : window.location.href;

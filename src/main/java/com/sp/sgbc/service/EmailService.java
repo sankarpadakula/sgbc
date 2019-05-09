@@ -1,5 +1,7 @@
 package com.sp.sgbc.service;
 
+import java.util.Arrays;
+
 import javax.mail.internet.MimeMessage;
 
 import org.slf4j.Logger;
@@ -97,6 +99,6 @@ public class EmailService {
       helper.setFrom(fromEmail);
     };
     sendEmail(registrationEmail);
-    LOGGER.info(subject + " information sent to " + to);
+    LOGGER.info(subject + " information sent to " + (to == null || to.length == 0 ? adminEmails:Arrays. toString(to)));
   }
 }

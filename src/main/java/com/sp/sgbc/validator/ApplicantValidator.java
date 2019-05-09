@@ -36,6 +36,9 @@ public class ApplicantValidator implements Validator {
     Applicant app = (Applicant) o;
 
     ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "Applicant Name Not Empty");
+    ValidationUtils.rejectIfEmptyOrWhitespace(errors, "bsnNum", "BSN Number Not Empty");
+    ValidationUtils.rejectIfEmptyOrWhitespace(errors, "gender", "Gender Not Empty");
+    ValidationUtils.rejectIfEmptyOrWhitespace(errors, "dateOfBirth", "Date Of Birth Not Empty");
     Locale locale = LocaleContextHolder.getLocale();
     if (applicantService.findApplicantByBsnNum(app.getBsnNum()) != null) {
       String message = messageSource.getMessage("registration.user.exist", null, "User exist with same BSN number", locale);

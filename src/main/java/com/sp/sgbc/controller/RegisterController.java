@@ -23,6 +23,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -100,15 +102,11 @@ public class RegisterController {
 
   // Process form input data
   @RequestMapping(value = "/", method = POST)
-  public ModelAndView processRegistrationForm(ModelAndView modelAndView, @Valid Applicant user,
+  public ModelAndView processRegistrationForm(ModelAndView modelAndView, Applicant user,
       @RequestParam("docs") List<MultipartFile> files, BindingResult bindingResult, HttpServletRequest request) {
-    applicantValidator.validate(user, bindingResult);
     Locale locale = LocaleContextHolder.getLocale();
-    if (bindingResult.hasErrors()) {
-      // String error = bindingResult.getAllErrors().stream().map(v ->
-      // v.toString().split(";")[0]).collect(Collectors.joining(","));
-      String error = getError(bindingResult);
-      LOGGER.warn("Validation failed " + error);
+    String error = validate(user, bindingResult);
+    if (error != null) {
       modelAndView.addObject(VALIDATION_ERROR, error);
     } else {
       buildNewApplicantDefaults(user);
@@ -129,6 +127,18 @@ public class RegisterController {
     modelAndView.addObject("user", user);
     modelAndView.setViewName(REGISTRATION_PAGE);
     return modelAndView;
+  }
+
+  private String validate(@Valid Applicant user, BindingResult bindingResult) {
+    applicantValidator.validate(user, bindingResult);
+    if (bindingResult.hasErrors()) {
+      // String error = bindingResult.getAllErrors().stream().map(v ->
+      // v.toString().split(";")[0]).collect(Collectors.joining(","));
+      String error =  getError(bindingResult);
+      LOGGER.warn("Validation failed " + error);
+      return error;
+    }
+    return null;
   }
 
   @RequestMapping(value = "/confirm", method = GET)
@@ -195,35 +205,49 @@ public class RegisterController {
 
   @RequestMapping(value = "/admin/home", method = { RequestMethod.POST, GET })
   public ModelAndView confirmRegistration(ModelAndView modelAndView, Applicant user,
-      @RequestParam(name = "token", required = false) String token, HttpServletRequest request) {
-
-    if (token != null && !token.isEmpty()) {
-      Applicant applicant = applicantService.findByUid(token);
-      if (applicant != null) {
-        applicant.setActive(user.isActive());
-        applicant.setNotes(user.getNotes());
+      @RequestParam(name = "token", required = false) String token, BindingResult bindingResult, HttpServletRequest request) {
+    String body = null;
+    String subject = messageSource.getMessage("registration.confirmation.subject", null, DEFAULT_EMAIL_APP_RES,
+        LocaleContextHolder.getLocale());
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    Applicant applicant = null;
+    if (token != null && !token.isEmpty())
+      applicant = applicantService.findByUid(token);
+    else if (auth != null && user.isActive()) {
+      /*String error = validate(user, bindingResult);
+      if (error != null) {
+        modelAndView.addObject("user", user);
+        modelAndView.addObject(VALIDATION_ERROR, error);
+        modelAndView.setViewName(REGISTRATION_PAGE);
+        return modelAndView;
+      }*/
+      buildNewApplicantDefaults(user);
+      applicant = user;
+    }
+    
+    if (applicant != null) {
+      applicant.setActive(user.isActive());
+      applicant.setNotes(user.getNotes());
+      if (applicant.isActive()) {
         applicant.setStartDate(Helper.getNextMonthStartDate());
         applicantService.save(applicant);
-        applicantService.deleteByUid(token);
-      }
-      String subject = messageSource.getMessage("registration.confirmation.subject", null, DEFAULT_EMAIL_APP_RES,
-          LocaleContextHolder.getLocale());
-      String body = null;
-      if (applicant.isActive()) {
+        if (token != null && !token.isEmpty())
+          applicantService.deleteByUid(token);
         int noOfPersons = 1;
         if (applicant.getPartner() != null) {
           noOfPersons = noOfPersons + 1;
         }
         body = buildApprovalConfirmationMessage(payPerPerson * noOfPersons, applicant);
       } else {
-        String appUrl = request.getRequestURL().toString() + "confirm?token=" + token;
+        applicantService.save(token, user);
+        String appUrl = request.getRequestURL().toString().replaceAll(request.getServletPath(), "") + "/confirm?token="
+            + token;
         body = buildRejectRequestMessage(appUrl, applicant);
       }
-      emailService.sendHtmlEmail(subject, body, true, new String[] { applicant.getEmail() });
+      emailService.sendHtmlEmail(subject, body, true, new String[] { user.getEmail() });
     }
+    
     modelAndView = new ModelAndView();
-    // modelAndView.addObject("Results", applicantService.findAll());
-    // modelAndView.addObject("adminMessage", "Content Available Only for Users with Admin Role");
     modelAndView.setViewName(ADMIN_PAGE);
     return modelAndView;
   }

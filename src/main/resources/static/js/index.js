@@ -14,16 +14,17 @@ $(function() {
           }
         },
         prmNames: {
-          page: "page.page",
-          rows: "page.size",
-          sort: "page.sort",
-          order: "page.sort.dir"
+          page: "page",
+          rows: "size",
+          sort: "sort",
+          order: "sort.dir"
         },
-        sortname: 'title',
+        sortname: 'id',
         sortorder: 'asc',
         height: 'auto',
         viewrecords: true,
         rowList: [10, 20, 50, 100],
+        rowNum: 10,
         altRows: true,
         loadError: function(xhr, status, error) {
           alert(error);
@@ -78,11 +79,23 @@ $(function() {
   // Transaction detail grid
   var editTransOptions = {
       width: "auto",
+      afterSubmit: function () {
+        var selr = jQuery('#masterGrid').jqGrid('getGridParam','selrow');
+        jQuery('#masterGrid').trigger('reloadGrid',[{current:true}]);
+        jQuery('#masterGrid').jqGrid('setSelection',selr,true);
+        return [true];
+      },
       onclickSubmit: function(params, postdata) {
         params.url = TRANSACTION_URL + postdata.id;
       }
     };
   var delTransOptions = {
+      afterSubmit: function () {
+        var selr = jQuery('#masterGrid').jqGrid('getGridParam','selrow');
+        jQuery('#masterGrid').trigger('reloadGrid',[{current:true}]);
+        jQuery('#masterGrid').jqGrid('setSelection',selr,true);
+        return [true];
+      },
       onclickSubmit: function(params, postdata) {
         params.url = TRANSACTION_URL + postdata;
       }
@@ -112,7 +125,7 @@ $(function() {
         formatter:function(cellvalue, options, rowObject) {
             return cellvalue.toString().substring(0,2)+'-'+cellvalue.toString().substring(2);
           },
-        width: 90,
+        width: 75,
         editable: true,
         editoptions: {disabled: true, thousandsSeparator: "-", size:10}
       },
@@ -120,7 +133,7 @@ $(function() {
         name:'name',
         label: 'Name',
         index: 'name',
-        width: 200,
+        width: 250,
         editable: true,
         editrules: {required: true},
         formoptions: {rowpos: 2, colpos: 1}
@@ -132,7 +145,7 @@ $(function() {
         align: 'center',
         editable: true,
         edittype: "select",
-        editoptions: { value: "M:Male;F:Female" },
+        editoptions: { value: "Male:Male;Female:Female" },
           formoptions: {rowpos: 2, colpos: 2}
       },
       {
@@ -174,7 +187,7 @@ $(function() {
         name:'email',
         label: 'Email',
         index: 'email',
-        width: 200,
+        width: 250,
         editable: true,
         editrules: {required: true},
         formoptions: {rowpos: 5, colpos: 1}
@@ -183,7 +196,7 @@ $(function() {
         name:'phone',
         label: 'Phone',
         index: 'phone',
-        width: 120,
+        width: 110,
         editable: true,
         editrules: {edithidden:true},
         formoptions: {rowpos: 5, colpos: 2}
@@ -205,7 +218,7 @@ $(function() {
                 });
               }
           },
-          width: 100,
+          width: 95,
           align: 'center',
           editable: true,
           editrules: {required: true},
@@ -224,6 +237,7 @@ $(function() {
          name:'bsnNum',
          label: 'Bsn Num',
          index: 'bsnNum',
+         width: 120,
          editable: true,
          editrules: {edithidden:true},
          formoptions: {rowpos: 7, colpos:1}
@@ -233,7 +247,7 @@ $(function() {
         label: 'Marital Status',
         index: 'maritalStatus',
         align: 'center',
-        width: 110,
+        width: 105,
         editable: true,
         edittype: 'select',
         editrules: {edithidden:true},
@@ -268,7 +282,7 @@ $(function() {
               });
             }
         },
-        width: 100,
+        width: 95,
         align: 'center',
         editable: false,
         editrules: {required: true, integer: true}
@@ -278,7 +292,7 @@ $(function() {
         label: 'Initial balance',
         index: 'initBalance',
         align: 'right',
-        width: 110,
+        width: 105,
         formatter:'currency',
         formatoptions:{
             thousandsSeparator: ",",
@@ -293,10 +307,10 @@ $(function() {
       },
       {
         name: 'closeBalance',
-        label: 'Closing balance',
+        label: 'Close balance',
         index: 'closeBalance',
         align: 'right',
-        width: 120,
+        width: 105,
         formatter:'currency',
         formatoptions:{
             thousandsSeparator: ",",
@@ -313,7 +327,7 @@ $(function() {
         label: 'Amount Due',
         index: 'amountDue',
         align: 'right',
-        width: 100,
+        width: 95,
         sorttype: "currency",
         formatter: function (cellValue, option, rowObject) {
             return "€ " + (parseFloat(rowObject.initBalance) - parseFloat(rowObject.closeBalance)).toFixed(2);
@@ -390,48 +404,41 @@ $(function() {
     ],
     caption: "Applicants",
     pager : '#masterGridPager',
-    height: 'auto',
+    loadonce: false,
+    height: '243',
+    width: "100%",
+    maxHeight: '300',
     onSelectRow: function(rowid, selected) {
         if(rowid != null) {
           var row = $(this).getRowData(rowid);
+          jQuery("#dependentGrid").jqGrid('setGridParam',{url: DEPENDENT_URL + rowid, editurl:DEPENDENT_URL + rowid, datatype: 'json'});
+          jQuery("#dependentGrid").jqGrid('setCaption', 'Dependents ::'+rowid.substr(0, 2)+'-'+rowid.substr(2)+' ('+row.name+')');
+          jQuery("#dependentGrid").trigger("reloadGrid");
+          
           jQuery("#transactionGrid").jqGrid('setGridParam',{url: TRANSACTION_URL + rowid, editurl:TRANSACTION_URL + rowid, datatype: 'json'});
           jQuery("#transactionGrid").jqGrid('setCaption', 'Transactions ::'+rowid.substr(0, 2)+'-'+rowid.substr(2)+' ('+row.name+')');
           jQuery("#transactionGrid").trigger("reloadGrid");
         }
       },
     ondblClickRow: function(id) {
-      if (!id.includes('inner')) {
-        $("#dlg").load("/"+id).dialog("open");
+      if (!id.indexOf('inner') >= 0) {
+        $("#dlg").load("../"+id).dialog("open");
       }
-    },
-    
-    // Inner grid
-    jsonReader: {
-        subgrid : { repeatitems: false}
-    },
-    subGrid: true,
-    subgridtype: 'json',
-    subGridRowExpanded: showChildGrid
-    
+    }
+
   };
 
-  function showChildGrid(parentRowID, parentRowKey) {
-      var childGridID = parentRowID + "_table";
-      var childGridPagerID = parentRowID + "_pager";
-      var childGridURL = DEPENDENT_URL + parentRowKey;
-      $('#' + parentRowID).append("<table id=" + childGridID + " border='1' cellpadding='0' cellspacing='0'></table><div id=" + childGridPagerID + "></div>");
-
-      $("#" + childGridID).jqGrid({
-          url: childGridURL,
-          editurl: childGridURL,
+  $("#dependentGrid").jqGrid({
+          url: DEPENDENT_URL,
+          editurl: DEPENDENT_URL,
           mtype: "GET",
           datatype: "json",
           idPrefix: "inner",
           page: 1,
           colModel: [
-              { label: 'Reg Num', name:'id', index: 'id', formatter:'integer', width: 80, editable: true, editoptions: {disabled: true}},
+              { label: 'Reg Num', name:'id', index: 'id', formatter:'integer', width: 60, editable: true, editoptions: {disabled: true}},
               { label: 'Name', name: 'name', width: 200,editable: true,formoptions: {rowpos: 2, colpos: 1} },
-              { label: 'Gender', name: 'gender', width: 60, align: 'center',editable: true, edittype: "select", editoptions: { value: "M:Male;F:Female" },formoptions: {rowpos: 2, colpos: 2}},
+              { label: 'Gender', name: 'gender', width: 60, align: 'center',editable: true, edittype: "select", editoptions: { value: "Male:Male;Female:Female" },formoptions: {rowpos: 2, colpos: 2}},
               { label: 'Date Of Birth', name: "dateOfBirth",index:"dateOfBirth",width:100,align:"center",sorttype:'date', formatter: 'date', formatoptions: {newformat: 'Y-m-d' }, formoptions: {rowpos: 3, colpos: 1},editable: true,
                 editoptions: {
                   dataInit: function (element) {
@@ -452,19 +459,23 @@ $(function() {
               { label: 'Modified Date', name: 'modifiedDate', width: 110 },
               { label: 'Active', name:"active",index:"active",formatter: 'checkbox', width: 50, align: 'center', editable: true, edittype: 'checkbox', editoptions: {value:"true:false"}, formoptions: {rowpos: 5, colpos: 1}}
           ],
-          loadonce: true,
-          height: '100%',
-          ondblClickRow: depEditOptions,
-          pager: "#" + childGridPagerID
-      }).navGrid('#' + childGridPagerID,
+          loadonce: false,
+          caption: "Dependents",
+          width: "100%",
+          height: '98',
+          maxHeight: '100',
+          ondblClickRow: function(id) {
+            jQuery(this).jqGrid('editGridRow', id, depEditOptions);
+          },
+          pager: "#dependentGridPager"
+      }).navGrid('#dependentGridPager',
             {}, //options
             depEditOptions,
             addOptions,
             depDelOptions,
             {} // search options
       );
-  }
-
+ 
   $("#masterGrid")
       .jqGrid(options)
       .navGrid('#masterGridPager',
@@ -475,6 +486,7 @@ $(function() {
       {} // search options
   );
 
+  var lastSel;
   var transOptions = {
       url: TRANSACTION_URL,
       editurl: TRANSACTION_URL,
@@ -549,8 +561,9 @@ $(function() {
       ],
       caption: "Transactions",
       pager : '#transactionGridPager',
-      height: 'auto',
-      width: 800,
+      width: "780",
+      height: '145',
+      maxHeight: '200',
       rownumbers: true,
       rownumWidth: 35,
       footerrow: true,

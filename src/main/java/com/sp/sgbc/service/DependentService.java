@@ -27,6 +27,11 @@ public class DependentService {
   private ApplicantRepository applicantRepository;
 
   public Dependent save(Dependent dependent) {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    if (auth != null) {
+      dependent.setModifiedBy(auth.getName());
+      dependent.setModifiedDate(new Date());
+    }
     return dependentRepository.save(dependent);
   }
 

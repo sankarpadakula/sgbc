@@ -3824,7 +3824,7 @@ table.table-mail tr td {
   background: linear-gradient(to right, lightyellow, lightblue, lightgreen);
 }
 .bg-image {
-  background: url(/images/logo.png) top left no-repeat;
+  background: url(../images/logo.png) top left no-repeat;
 }
 
 .white-bg {

@@ -6,13 +6,16 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.TableGenerator;
 
 @Entity
 @Table(name = "address")
 public class Address {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
+  @GeneratedValue(strategy=GenerationType.TABLE, generator="address")
+  @TableGenerator(name="address", table="SEQ_GENERATOR", pkColumnName = "key", valueColumnName = "next", 
+  pkColumnValue="address",allocationSize=1)
   @Column(name = "id")
   private Long id;
 

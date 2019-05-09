@@ -3,6 +3,7 @@ package com.sp.sgbc.service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,6 +28,7 @@ import com.sp.sgbc.model.Dependent;
 import com.sp.sgbc.model.Transaction;
 import com.sp.sgbc.repository.ApplicantRepository;
 import com.sp.sgbc.repository.ApplicantRequestRepository;
+import com.sp.sgbc.util.DependentType;
 import com.sp.sgbc.util.Helper;
 
 @Service("applicantService")
@@ -83,7 +85,18 @@ public class ApplicantServiceImpl implements ApplicantService {
   }
 
   public Applicant findOne(Long id) {
-    return applicantRepository.findById(id).orElse(null);
+    Applicant applicant = applicantRepository.findById(id).orElse(null);
+    if (applicant != null && applicant.getPartner() == null){
+      Iterator<Dependent> dependents = applicant.getChildrens().iterator();
+      while (dependents.hasNext()) {
+        Dependent dependent = dependents.next();
+        if (dependent.getType() == DependentType.Spouse) {
+          applicant.setPartner(dependent);
+          dependents.remove();
+        }
+      }
+    }
+    return applicant;
   }
 
   @Override

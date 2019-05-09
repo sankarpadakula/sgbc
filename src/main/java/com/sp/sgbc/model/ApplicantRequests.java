@@ -3,6 +3,7 @@ package com.sp.sgbc.model;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
 
@@ -10,6 +11,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Entity
+@Table(name = "applicant_requests")
 public class ApplicantRequests {
 
   @Id

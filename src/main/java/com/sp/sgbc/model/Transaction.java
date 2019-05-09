@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -18,7 +19,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class Transaction {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
+  @GeneratedValue(strategy=GenerationType.TABLE, generator="transaction")
+  @TableGenerator(name="transaction", table="SEQ_GENERATOR", pkColumnName = "key", valueColumnName = "next", 
+  pkColumnValue="transaction",allocationSize=1)
   @Column(name = "id")
   private Long id;
 

@@ -16,7 +16,9 @@ import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -64,8 +66,15 @@ public class ApplicantRestController {
 
   @RequestMapping(method = GET)
   @Transactional
-  public ViewPage<Applicant> listApplicants(Pageable page) {
-    Page<Applicant> applicants = applicantService.findAll(page);
+  public ViewPage<Applicant> listApplicants(final HttpServletRequest req) {
+    int page = Integer.valueOf(req.getParameter("page")).intValue();
+    int pageSize = Integer.valueOf(req.getParameter("size")).intValue();
+    String sortkey = req.getParameter("sort");
+    String direction = req.getParameter("sort.dir");
+    Pageable pageable = PageRequest.of(page - 1, pageSize,
+        direction == null ? Sort.Direction.ASC : Sort.Direction.fromString(direction),
+        sortkey == null ? "id" : sortkey);
+    Page<Applicant> applicants = applicantService.findAll(pageable);
     return new ViewPage<Applicant>(applicants);
   }
 
@@ -114,6 +123,12 @@ public class ApplicantRestController {
   /**
    * Dependents rest calls
    */
+
+  @RequestMapping(value = "/dependents", method = { GET })
+  public List<Dependent> getDependents() {
+    return new ArrayList<Dependent>();
+  }
+  
   @RequestMapping(value = "/dependents/{id}", method = { GET })
   public DependentResponse getDependantsByApplicantId(@PathVariable("id") Long id) {
     List<Dependent> dependents = dependentService.getDependentsByApplicantId(id);
@@ -125,8 +140,10 @@ public class ApplicantRestController {
   @RequestMapping(value = "/dependents/{id}", method = PUT)
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void updateDependent(@PathVariable("id") Long id, @RequestBody Dependent dependent) {
-    if (dependentService.exists(id)) {
+    Dependent existingDep = dependentService.findOne(id);
+    if (existingDep != null) {
       dependent.setId(id);
+      dependent.setApplicant(existingDep.getApplicant());
       dependentService.save(dependent);
     }
   }
@@ -164,13 +181,11 @@ public class ApplicantRestController {
     }
     TransactionResponse response = new TransactionResponse();
     response.setRows(trans);
-    if (total != 0) {
-      response.getUserdata().put("transactionDate", "Total");
-      response.getUserdata().put("amountPaid", total + "");
-    }
+    response.getUserdata().put("transactionDate", "Total");
+    response.getUserdata().put("amountPaid", total + "");
     return response;
   }
-
+  
   @RequestMapping(value = "/transactions", method = { GET })
   public List<Transaction> getTransactions() {
     // return transactionService.getAllTransaction(id);
@@ -189,8 +204,10 @@ public class ApplicantRestController {
   @RequestMapping(value = "/transactions/{id}", method = PUT)
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void updateTransaction(@PathVariable("id") Long id, @RequestBody Transaction transaction) {
-    if (transactionService.exists(id)) {
+    Transaction existingTransaction = transactionService.findOne(id);
+    if (existingTransaction != null) {
       transaction.setId(id);
+      transaction.setApplicantId(existingTransaction.getApplicantId());
       transactionService.save(transaction);
     }
   }

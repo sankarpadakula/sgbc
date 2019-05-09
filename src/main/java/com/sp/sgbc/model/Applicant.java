@@ -1,5 +1,6 @@
 package com.sp.sgbc.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -13,8 +14,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
@@ -30,11 +31,12 @@ import com.sp.sgbc.configuration.CustomJsonDateSerializer;
 @Entity
 @Table(name = "applicant")
 @JsonIgnoreProperties(value = { "docs" })
-public class Applicant {
+public class Applicant implements Serializable{
 
   @Id
-  @SequenceGenerator(name = "APPLICANT_REG", sequenceName = "APPLICANT_REG", initialValue=1100000)
-  @GeneratedValue(generator = "APPLICANT_REG", strategy = GenerationType.SEQUENCE)
+  @GeneratedValue(strategy=GenerationType.TABLE, generator="applicant")
+  @TableGenerator(name="applicant", table="SEQ_GENERATOR", pkColumnName = "key", valueColumnName = "next", 
+  pkColumnValue="applicant",allocationSize=1, initialValue=1100000)
   @Column(unique = true, nullable = false)
   private Long id;
 
@@ -81,6 +83,7 @@ public class Applicant {
 
   private String wishes;
 
+  @Column(nullable = false,columnDefinition = "boolean default true") 
   private boolean active;
 
   @Transient
@@ -89,18 +92,21 @@ public class Applicant {
   private String fileName;
 
   @DateTimeFormat(pattern = "dd/MM/yyyy")
+  @Temporal(TemporalType.DATE)
   private Date startDate;
 
   private String createdBy;
 
   @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
   @Temporal(TemporalType.DATE)
+  @Column(nullable = true)
   private Date createdDate;
 
   private String modifiedBy;
 
   @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
   @Temporal(TemporalType.DATE)
+  @Column(nullable = true)
   private Date modifiedDate;
 
   @Transient

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <title>Applicants / Transactions</title>
+  <link rel="shortcut icon" href="../images/logo.png" type="image/png">
   <meta charset="utf-8">
   <link th:href="@{/css/ui.jqgrid-bootstrap.css}" rel="stylesheet" />
   <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
@@ -15,7 +16,10 @@
   <script th:src="@{/js/jquery.jqGrid.min.js}"></script>
   <script th:src="@{/js/jquery.printElement.js}"></script>
   <script th:src="@{/js/jquery-migrate-1.0.0.js}"></script>
+  
   <script th:src="@{/js/index.js}"></script>
+  <script th:src="@{/js/registration.js}"></script>
+  
   <style type="text/css">
   .ui-th-div {
     margin-bottom: 5px;
@@ -29,7 +33,7 @@
   background: linear-gradient(to right, lightyellow, lightblue, lightgreen);
 }
 .bg-image {
-  background: url(/images/logo.png) top left no-repeat;
+  background: url(../images/logo.png) top left no-repeat;
 }
 .tab-pane {
   background-color: #fff;
@@ -74,17 +78,22 @@
 
   <!-- Tab panes -->
   <div class="tab-content">
-    <div id="home" class=" tab-pane active"><br>
+    <div id="home" class=" tab-pane active">
         <table id="masterGrid" border="1" cellpadding="0" cellspacing="0"></table>
         <div id="masterGridPager"></div>
         <br />
+        <div id="dependentPlaceholder">
+          <table id="dependentGrid" border="1" cellpadding="0" cellspacing="0"></table>
+          <div id="dependentGridPager"></div>
+        </div>
+        <br />
         <div id="detailsPlaceholder">
           <table id="transactionGrid" border="1" cellpadding="0" cellspacing="0"></table>
-          <div id="transactionGridPager"></div>
-          <div class="input-group margin-bottom-sm">
-                <span class="input-group-addon"><i class="fa fa-user-o fa-fw"></i></span>
-                <div id="prt-container" class='hide'></div>
-          </div>
+-           <div id="transactionGridPager"></div>
+-           <div class="input-group margin-bottom-sm">
+-             <span class="input-group-addon"><i class="fa fa-user-o fa-fw"></i></span>
+-             <div id="prt-container" class='hide'></div>
+            </div>
         </div>
     </div>
     <div id="menu1" class=" tab-pane fade"><br>
